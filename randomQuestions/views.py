@@ -9,7 +9,12 @@ from rest_framework.exceptions import (
 )
 from rest_framework import status
 from .models import Questions, QuestionUser
-from .serializers import QuestionsSerializer, QuestionUserSerializer
+from .serializers import (
+    QuestionsSerializer,
+    QuestionUserSerializer,
+    QuestionsCreateSerializer,
+)
+from django.db import transaction
 
 
 class QuestionsList(APIView):
@@ -18,15 +23,31 @@ class QuestionsList(APIView):
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data)
 
+    # 질문 만들기, 나의 질문에 추가하기
     def post(self, request):
-        serializer = QuestionsSerializer(data=request.data)
-        if serializer.is_valid():
-            question = serializer.save()
-            return Response(
-                QuestionsSerializer(question).data,
+        # 질문 만들기
+        questionsSerializer = QuestionsCreateSerializer(data=request.data)
+        if questionsSerializer.is_valid():
+            question = questionsSerializer.save(authon=request.user)
+            # 나의 질문에 추가하기, data가 필요 없는데 아무것도 없으면 에러나서 넣음
+            questionUserSerializer = QuestionUserSerializer(
+                data=QuestionsSerializer(question).data
             )
+            if questionUserSerializer.is_valid():
+                questionUserSerializer.save(
+                    question=question,
+                    user=request.user,
+                )
+                return Response(
+                    QuestionsSerializer(question).data,
+                )
+            else:
+                return Response(
+                    questionUserSerializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             return Response(
-                serializer.errors,
+                questionsSerializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )

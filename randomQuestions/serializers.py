@@ -16,10 +16,13 @@ class QuestionsSerializer(ModelSerializer):
         )
 
 
+class QuestionsCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Questions
+        fields = ("description",)
+
+
 class QuestionUserSerializer(ModelSerializer):
     class Meta:
         model = QuestionUser
-        fields = (
-            "question",
-            "user",
-        )
+        fields = ()
