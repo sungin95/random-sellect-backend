@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import (
@@ -16,9 +15,12 @@ from .serializers import (
 )
 from sellectedQuestions.serializers import SellectedQuestionSerializer
 from django.db import transaction
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class QuestionsList(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         all_questions = Questions.objects.all()
         serializer = QuestionsSerializer(all_questions, many=True)
@@ -31,9 +33,7 @@ class QuestionsList(APIView):
         if questionsSerializer.is_valid():
             question = questionsSerializer.save(authon=request.user)
             # 나의 질문에 추가하기, data가 필요 없는데 아무것도 없으면 에러나서 넣음
-            questionUserSerializer = SellectedQuestionSerializer(
-                data=QuestionsSerializer(question).data
-            )
+            questionUserSerializer = SellectedQuestionSerializer(data=request.data)
             if questionUserSerializer.is_valid():
                 questionUserSerializer.save(
                     question=question,
@@ -52,3 +52,16 @@ class QuestionsList(APIView):
                 questionsSerializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class QuestionsDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Questions.objects.get(pk=pk)
+        except Questions.DoesNotExist:
+            raise NotFound
+
+    def delete(self, request, pk):
+        question = self.get_object(pk)
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

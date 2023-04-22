@@ -10,6 +10,7 @@ class SellectedQuestion(CommonModel):
         blank=True,
         related_name="questions",
     )
+    description = models.TextField()
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,

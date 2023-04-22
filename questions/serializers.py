@@ -11,6 +11,7 @@ class QuestionsSerializer(ModelSerializer):
     class Meta:
         model = Questions
         fields = (
+            "pk",
             "description",
             "authon",
         )
