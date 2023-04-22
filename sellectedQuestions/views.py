@@ -17,6 +17,7 @@ from sellectedQuestions.serializers import (
 from django.db import transaction
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from questions.serializers import QuestionsCreateSerializer
+import random
 
 
 # 내 질문 목록 보기(get)
@@ -26,6 +27,32 @@ class SellectedQuestions(APIView):
     def get(self, request):
         questions = SellectedQuestion.objects.filter(user=request.user)
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
+        return Response(serializer.data)
+
+
+class SellectedQuestionStart(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def start(self, request):
+        sum_list = []
+        sum_ = 0
+        for i in SellectedQuestion.objects.filter(user=request.user):
+            sum_ += i.importance
+            for j in range(i.importance):
+                sum_list.append(i)
+        try:
+            return random.choice(sum_list)
+        except:
+            # 오류를 대비해 값을 넣어 두었음.
+            return {
+                "pk": 0,
+                "description": "질문지가 없습니다.",
+                "importance": 3,
+            }
+
+    def get(self, request):
+        sellectedquestion = self.start(request)
+        serializer = ShowSellectedQuestionSerializer(sellectedquestion)
         return Response(serializer.data)
 
 

@@ -16,3 +16,4 @@ class SellectedQuestion(CommonModel):
         on_delete=models.CASCADE,
     )
     importance = models.PositiveIntegerField(default=3)
+
