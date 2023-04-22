@@ -15,12 +15,14 @@ from sellectedQuestions.serializers import (
     ImportanceSellectedQuestionSerializer,
 )
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from questions.serializers import QuestionsCreateSerializer
 
 
 # 내 질문 목록 보기(get)
 class SellectedQuestions(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         questions = SellectedQuestion.objects.filter(user=request.user)
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
@@ -29,6 +31,8 @@ class SellectedQuestions(APIView):
 
 # 생성(post),
 class SellectQuestion(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         try:
             return Questions.objects.get(pk=pk)
@@ -59,7 +63,7 @@ class SellectQuestion(APIView):
 
 # 수정(put, importance), 삭제(delete)
 class SellectedQuestionsDetail(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -69,6 +73,10 @@ class SellectedQuestionsDetail(APIView):
 
     def put(self, request, pk):
         sellectedQuestion = self.get_object(pk)
+        # 검증
+        if sellectedQuestion.user != request.user:
+            raise PermissionDenied
+
         serializer = ImportanceSellectedQuestionSerializer(
             sellectedQuestion,
             data=request.data,
@@ -87,5 +95,9 @@ class SellectedQuestionsDetail(APIView):
 
     def delete(self, request, pk):
         sellectedQuestion = self.get_object(pk)
+        # 검증
+        if sellectedQuestion.user != request.user:
+            raise PermissionDenied
+
         sellectedQuestion.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
