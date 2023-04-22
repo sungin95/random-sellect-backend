@@ -2,20 +2,9 @@ from django.db import models
 from common.models import CommonModel
 
 
-class Questions(CommonModel):
-    description = models.TextField()
-    authon = models.ForeignKey(
-        "users.User",
-        on_delete=models.CASCADE,
-    )
-
-    def count(self):
-        return self.questions.count()
-
-
-class QuestionUser(CommonModel):
+class SellectedQuestion(CommonModel):
     question = models.ForeignKey(
-        "Questions",
+        "questions.Questions",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

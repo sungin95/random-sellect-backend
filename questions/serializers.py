@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Questions, QuestionUser
+from .models import Questions
 from users.serializers import UserCheckSerializer
 
 
@@ -20,9 +20,3 @@ class QuestionsCreateSerializer(ModelSerializer):
     class Meta:
         model = Questions
         fields = ("description",)
-
-
-class QuestionUserSerializer(ModelSerializer):
-    class Meta:
-        model = QuestionUser
-        fields = ()

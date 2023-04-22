@@ -8,12 +8,13 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework import status
-from .models import Questions, QuestionUser
+from .models import Questions
+from sellectedQuestions.models import SellectedQuestion
 from .serializers import (
     QuestionsSerializer,
-    QuestionUserSerializer,
     QuestionsCreateSerializer,
 )
+from sellectedQuestions.serializers import SellectedQuestionSerializer
 from django.db import transaction
 
 
@@ -30,7 +31,7 @@ class QuestionsList(APIView):
         if questionsSerializer.is_valid():
             question = questionsSerializer.save(authon=request.user)
             # 나의 질문에 추가하기, data가 필요 없는데 아무것도 없으면 에러나서 넣음
-            questionUserSerializer = QuestionUserSerializer(
+            questionUserSerializer = SellectedQuestionSerializer(
                 data=QuestionsSerializer(question).data
             )
             if questionUserSerializer.is_valid():

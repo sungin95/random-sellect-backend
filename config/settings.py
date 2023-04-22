@@ -31,7 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "randomQuestions.apps.RandomquestionsConfig",
+    "questions.apps.QuestionsConfig",
+    "sellectedQuestions.apps.SellectedquestionsConfig",
     "users.apps.UsersConfig",
     "common.apps.CommonConfig",
     "rest_framework",
