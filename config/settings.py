@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "common.apps.CommonConfig",
     "rest_framework",
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -132,3 +134,5 @@ PAGE_SIZE = 10
 
 # Auth
 AUTH_USER_MODEL = "users.User"
+
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:3000"]
