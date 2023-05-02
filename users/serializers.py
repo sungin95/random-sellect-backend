@@ -9,3 +9,9 @@ class UserCheckSerializer(ModelSerializer):
             "pk",
             "username",
         )
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username",)
