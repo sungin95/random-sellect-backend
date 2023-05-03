@@ -68,23 +68,30 @@ class SellectQuestion(APIView):
 
     def post(self, request, pk):
         question = self.get_object(pk)
-        sellectedQuestionSerializer = SellectedQuestionSerializer(
-            data=QuestionsCreateSerializer(question).data
-        )
-        if sellectedQuestionSerializer.is_valid():
-            sellectedQuestionSerializer.save(
-                question=question,
-                user=request.user,
+        questions = SellectedQuestion.objects.filter(question=question)
+        if len(questions) == 0:
+            sellectedQuestionSerializer = SellectedQuestionSerializer(
+                data=QuestionsCreateSerializer(question).data
             )
-            return Response(
-                {
-                    "ok": "ok",
-                },
-            )
+            if sellectedQuestionSerializer.is_valid():
+                sellectedQuestionSerializer.save(
+                    question=question,
+                    user=request.user,
+                )
+                return Response(
+                    {
+                        "ok": "ok",
+                    },
+                )
+            else:
+                return Response(
+                    sellectedQuestionSerializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             return Response(
-                sellectedQuestionSerializer.errors,
-                status=status.HTTP_400_BAD_REQUEST,
+                {"already exists"},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
             )
 
 

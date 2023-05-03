@@ -14,6 +14,7 @@ class QuestionsSerializer(ModelSerializer):
             "pk",
             "description",
             "authon",
+            "count",
         )
 
 
