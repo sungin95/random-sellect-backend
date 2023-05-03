@@ -8,6 +8,4 @@ class Questions(CommonModel):
         "users.User",
         on_delete=models.CASCADE,
     )
-
-    def count(self):
-        return self.questions.count()
+    count = models.PositiveIntegerField(default=1)

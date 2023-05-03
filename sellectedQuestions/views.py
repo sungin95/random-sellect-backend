@@ -68,7 +68,9 @@ class SellectQuestion(APIView):
 
     def post(self, request, pk):
         question = self.get_object(pk)
-        questions = SellectedQuestion.objects.filter(question=question)
+        questions = SellectedQuestion.objects.filter(
+            question=question, user=request.user
+        )
         if len(questions) == 0:
             sellectedQuestionSerializer = SellectedQuestionSerializer(
                 data=QuestionsCreateSerializer(question).data
@@ -78,6 +80,9 @@ class SellectQuestion(APIView):
                     question=question,
                     user=request.user,
                 )
+                question.count += 1
+                question.save()
+
                 return Response(
                     {
                         "ok": "ok",
@@ -133,5 +138,8 @@ class SellectedQuestionsDetail(APIView):
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
 
+        q = sellectedQuestion.question
+        q.count -= 1
+        q.save()
         sellectedQuestion.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
