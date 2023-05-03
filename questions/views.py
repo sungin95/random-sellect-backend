@@ -22,7 +22,7 @@ class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        all_questions = Questions.objects.all()
+        all_questions = Questions.objects.all().order_by("-count")
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data)
 
