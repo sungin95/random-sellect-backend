@@ -115,7 +115,10 @@ class SellectedQuestionsDetail(APIView):
         # 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
-
+        if request.data["importance"]:
+            importance_ = int(request.data["importance"])
+            importance_ += sellectedQuestion.importance
+            request.data["importance"] = importance_
         serializer = ImportanceSellectedQuestionSerializer(
             sellectedQuestion,
             data=request.data,
