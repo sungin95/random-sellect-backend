@@ -25,7 +25,11 @@ SECRET_KEY = "django-insecure-ofe65_3jl^^wj2o#6h9xm(xhk6=vc3p%+y($xfq9zbefqn^lg0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "3.39.231.74",
+    ".gpt-is-interviewer.me",
+    "ec2-3-39-231-74.ap-northeast-2.compute.amazonaws.com",
+]
 
 
 # Application definition
