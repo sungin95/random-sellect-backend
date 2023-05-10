@@ -11,5 +11,7 @@ Type=notify
 StandardError=syslog
 NotifyAccess=all
 
+static-map = /static=/srv/random-sellect-backend/static/
+
 [Install]
 WantedBy=multi-user.target

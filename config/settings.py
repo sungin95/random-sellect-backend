@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-ofe65_3jl^^wj2o#6h9xm(xhk6=vc3p%+y($xfq9zbefqn^lg0
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "3.36.175.157/",
+    "3.36.175.157",
     ".gpt-is-interviewer.me",
     "ec2-3-36-175-157.ap-northeast-2.compute.amazonaws.com",
 ]
