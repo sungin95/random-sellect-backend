@@ -146,3 +146,6 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000"]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+SESSION_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
+CSRF_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
