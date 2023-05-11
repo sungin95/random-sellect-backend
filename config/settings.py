@@ -50,9 +50,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -142,12 +142,10 @@ AUTH_USER_MODEL = "users.User"
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [".gpt-is-interviewer.me:3030"]
-CSRF_TRUSTED_ORIGINS = [".gpt-is-interviewer.me:3030"]
+CORS_ALLOWED_ORIGINS = [".gpt-is-interviewer.me"]
+CSRF_TRUSTED_ORIGINS = [".gpt-is-interviewer.me"]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-SESSION_COOKIE_DOMAIN = ".gpt-is-interviewer.me:3030"
-CSRF_COOKIE_DOMAIN = ".gpt-is-interviewer.me:3030"
-
-ACCESS_CONTROL_ALLOW_ORIGIN = ".gpt-is-interviewer.me:3030"
+SESSION_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
+CSRF_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
