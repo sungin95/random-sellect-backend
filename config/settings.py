@@ -142,8 +142,8 @@ AUTH_USER_MODEL = "users.User"
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [".gpt-is-interviewer.me:3030"]
-CSRF_TRUSTED_ORIGINS = [".gpt-is-interviewer.me:3030"]
+CORS_ALLOWED_ORIGINS = [".gpt-is-interviewer.me"]
+CSRF_TRUSTED_ORIGINS = [".gpt-is-interviewer.me"]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
