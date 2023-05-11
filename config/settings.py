@@ -149,3 +149,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 SESSION_COOKIE_DOMAIN = ".gpt-is-interviewer.me:3030"
 CSRF_COOKIE_DOMAIN = ".gpt-is-interviewer.me:3030"
+
+ACCESS_CONTROL_ALLOW_ORIGIN = ".gpt-is-interviewer.me:3030"
