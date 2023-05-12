@@ -141,11 +141,13 @@ AUTH_USER_MODEL = "users.User"
 
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [".gpt-is-interviewer.me"]
-CORS_ALLOWED_ORIGINS = [".gpt-is-interviewer.me"]
-CSRF_TRUSTED_ORIGINS = [".gpt-is-interviewer.me"]
+CORS_ORIGIN_WHITELIST = [
+    "https://www.gpt-is-interviewer.me",
+]
+CORS_ALLOWED_ORIGINS = ["https://www.gpt-is-interviewer.me"]
+CSRF_TRUSTED_ORIGINS = ["https://www.gpt-is-interviewer.me"]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-SESSION_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
-CSRF_COOKIE_DOMAIN = ".gpt-is-interviewer.me"
+SESSION_COOKIE_DOMAIN = "https://www.gpt-is-interviewer.me"
+CSRF_COOKIE_DOMAIN = "https://www.gpt-is-interviewer.me"
