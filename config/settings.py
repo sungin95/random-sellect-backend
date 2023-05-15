@@ -11,24 +11,27 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+import environ
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ofe65_3jl^^wj2o#6h9xm(xhk6=vc3p%+y($xfq9zbefqn^lg0"
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "3.36.175.157",
+    "localhost",
     ".gpt-is-interviewer.me",
-    "ec2-3-36-175-157.ap-northeast-2.compute.amazonaws.com",
 ]
 
 
@@ -142,12 +145,12 @@ AUTH_USER_MODEL = "users.User"
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
-    "https://www.gpt-is-interviewer.me",
+    env("FRONT_PAGE"),
 ]
-CORS_ALLOWED_ORIGINS = ["https://www.gpt-is-interviewer.me"]
-CSRF_TRUSTED_ORIGINS = ["https://www.gpt-is-interviewer.me"]
+CORS_ALLOWED_ORIGINS = [env("FRONT_PAGE")]
+CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-SESSION_COOKIE_DOMAIN = "https://www.gpt-is-interviewer.me"
-CSRF_COOKIE_DOMAIN = "https://www.gpt-is-interviewer.me"
+SESSION_COOKIE_DOMAIN = env("FRONT_PAGE")
+CSRF_COOKIE_DOMAIN = env("FRONT_PAGE")
