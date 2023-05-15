@@ -89,8 +89,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
     }
 }
 
@@ -152,5 +156,6 @@ CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
+# localhost로 접근시 주석처리 해 줘야함
 SESSION_COOKIE_DOMAIN = env("FRONT_PAGE")
 CSRF_COOKIE_DOMAIN = env("FRONT_PAGE")
