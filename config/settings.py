@@ -156,6 +156,8 @@ CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-# localhost로 접근시 주석처리 해 줘야함
-SESSION_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
-CSRF_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
+if env("DEPLOYING") == "True":
+    SESSION_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
+    CSRF_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
+elif env("DEPLOYING") == "False":
+    pass
