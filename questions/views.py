@@ -29,31 +29,29 @@ class QuestionsList(APIView):
         return Response(serializer.data)
 
     # 질문 만들기, 나의 질문에 추가하기
+    @transaction.atomic(using="default")
     def post(self, request):
-        # 질문 만들기
-        # ! 트랜잭션 추가하기
-        questionsSerializer = QuestionsCreateSerializer(data=request.data)
-        if questionsSerializer.is_valid():
-            question = questionsSerializer.save(authon=request.user)
-            # 나의 질문에 추가하기
-            questionUserSerializer = SellectedQuestionSerializer(data=request.data)
-            if questionUserSerializer.is_valid():
-                questionUserSerializer.save(
-                    user=request.user,
-                )
-                return Response(
-                    QuestionsSerializer(question).data,
-                )
-            else:
-                return Response(
-                    questionUserSerializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        else:
-            return Response(
-                questionsSerializer.errors,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        try:
+            with transaction.atomic():
+                # 질문 만들기
+                questionsSerializer = QuestionsCreateSerializer(data=request.data)
+                if questionsSerializer.is_valid():
+                    question = questionsSerializer.save(authon=request.user)
+                    # 나의 질문에 추가하기
+                    questionUserSerializer = SellectedQuestionSerializer(
+                        data=request.data
+                    )
+                    if questionUserSerializer.is_valid():
+                        questionUserSerializer.save(
+                            user=request.user,
+                        )
+                        return Response(
+                            QuestionsSerializer(question).data,
+                            status=status.HTTP_201_CREATED,
+                        )
+        except:
+            pass
+        return Response({"message": "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class QuestionsDetail(APIView):
