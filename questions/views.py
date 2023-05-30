@@ -16,7 +16,8 @@ from .serializers import (
     ImportanceSellectedQuestionSerializer,
 )
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+import random
 
 
 class QuestionsList(APIView):
@@ -30,14 +31,14 @@ class QuestionsList(APIView):
     # 질문 만들기, 나의 질문에 추가하기
     def post(self, request):
         # 질문 만들기
+        # ! 트랜잭션 추가하기
         questionsSerializer = QuestionsCreateSerializer(data=request.data)
         if questionsSerializer.is_valid():
             question = questionsSerializer.save(authon=request.user)
-            # 나의 질문에 추가하기, data가 필요 없는데 아무것도 없으면 에러나서 넣음
+            # 나의 질문에 추가하기
             questionUserSerializer = SellectedQuestionSerializer(data=request.data)
             if questionUserSerializer.is_valid():
                 questionUserSerializer.save(
-                    question=question,
                     user=request.user,
                 )
                 return Response(
@@ -68,19 +69,7 @@ class QuestionsDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.exceptions import (
-    NotFound,
-    NotAuthenticated,
-    ParseError,
-    PermissionDenied,
-)
-from rest_framework import status
-from questions.models import Questions
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from questions.serializers import QuestionsCreateSerializer
-import random
+#######################################################
 
 
 # 내 질문 목록 보기(get)
@@ -96,6 +85,7 @@ class SellectedQuestions(APIView):
 class SellectedQuestionStart(APIView):
     permission_classes = [IsAuthenticated]
 
+    # ! 수정 필요
     def start(self, request):
         sum_list = []
         sum_ = 0
