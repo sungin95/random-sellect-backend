@@ -85,17 +85,20 @@ class SellectedQuestions(APIView):
 class SellectedQuestionStart(APIView):
     permission_classes = [IsAuthenticated]
 
-    # ! 수정 필요
     def start(self, request):
-        sum_list = []
-        sum_ = 0
-        for i in SellectedQuestion.objects.filter(user=request.user):
-            sum_ += i.importance
-            for j in range(i.importance):
-                sum_list.append(i)
-        try:
-            return random.choice(sum_list)
-        except:
+        sellected_questions = SellectedQuestion.objects.filter(user=request.user)
+        if sellected_questions.exists():
+            selection_probability = [
+                question.importance for question in sellected_questions
+            ]
+
+            selected_question = random.choices(
+                sellected_questions, weights=selection_probability
+            )[0]
+
+            return selected_question
+
+        else:
             # 오류를 대비해 값을 넣어 두었음.
             return {
                 "pk": 0,
