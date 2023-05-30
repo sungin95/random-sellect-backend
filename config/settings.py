@@ -39,7 +39,6 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     "questions.apps.QuestionsConfig",
-    "sellectedQuestions.apps.SellectedquestionsConfig",
     "users.apps.UsersConfig",
     "common.apps.CommonConfig",
     "rest_framework",

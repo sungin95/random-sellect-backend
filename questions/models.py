@@ -2,10 +2,26 @@ from django.db import models
 from common.models import CommonModel
 
 
-class Questions(CommonModel):
+class Question(CommonModel):
     description = models.TextField()
+
+    class Meta:
+        abstract = True
+
+
+# 공용 질문
+class Questions(Question):
     authon = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
     )
     count = models.PositiveIntegerField(default=1)
+
+
+# 개인 질문 모음
+class SellectedQuestion(Question):
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+    )
+    importance = models.PositiveIntegerField(default=3)
