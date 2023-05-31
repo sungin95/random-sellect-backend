@@ -71,7 +71,7 @@ class QuestionsDetail(APIView):
 
 
 # 내 질문 목록 보기(get)
-class SellectedQuestions(APIView):
+class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
