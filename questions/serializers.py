@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Questions
 from users.serializers import UserCheckSerializer
-from .models import SellectedQuestion
+from .models import SellectedQuestions
 
 
 class QuestionsSerializer(ModelSerializer):
@@ -30,13 +30,13 @@ class QuestionsCreateSerializer(ModelSerializer):
 
 class SellectedQuestionSerializer(ModelSerializer):
     class Meta:
-        model = SellectedQuestion
+        model = SellectedQuestions
         fields = ("description",)
 
 
 class ShowSellectedQuestionSerializer(ModelSerializer):
     class Meta:
-        model = SellectedQuestion
+        model = SellectedQuestions
         fields = (
             "pk",
             "description",
@@ -46,5 +46,5 @@ class ShowSellectedQuestionSerializer(ModelSerializer):
 
 class ImportanceSellectedQuestionSerializer(ModelSerializer):
     class Meta:
-        model = SellectedQuestion
+        model = SellectedQuestions
         fields = ("importance",)

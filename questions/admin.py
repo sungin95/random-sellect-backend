@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Questions, SellectedQuestion
+from .models import Questions, SellectedQuestions
 
 
 @admin.register(Questions)
@@ -10,7 +10,7 @@ class QuestionsAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(SellectedQuestion)
+@admin.register(SellectedQuestions)
 class SellectedQuestionAdmin(admin.ModelAdmin):
     list_display = (
         "user",

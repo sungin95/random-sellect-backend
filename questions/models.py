@@ -19,7 +19,7 @@ class Questions(Question):
 
 
 # 개인 질문 모음
-class SellectedQuestion(Question):
+class SellectedQuestions(Question):
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,

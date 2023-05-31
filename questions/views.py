@@ -7,7 +7,7 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework import status
-from .models import Questions, SellectedQuestion
+from .models import Questions, SellectedQuestions
 from .serializers import (
     QuestionsSerializer,
     QuestionsCreateSerializer,
@@ -75,7 +75,7 @@ class SellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        questions = SellectedQuestion.objects.filter(user=request.user)
+        questions = SellectedQuestions.objects.filter(user=request.user)
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
         return Response(serializer.data)
 
@@ -84,7 +84,7 @@ class SellectedQuestionStart(APIView):
     permission_classes = [IsAuthenticated]
 
     def start(self, request):
-        sellected_questions = SellectedQuestion.objects.filter(user=request.user)
+        sellected_questions = SellectedQuestions.objects.filter(user=request.user)
         if sellected_questions.exists():
             selection_probability = [
                 question.importance for question in sellected_questions
@@ -122,7 +122,7 @@ class SellectQuestion(APIView):
 
     def post(self, request, pk):
         question = self.get_object(pk)
-        questions = SellectedQuestion.objects.filter(
+        questions = SellectedQuestions.objects.filter(
             question=question, user=request.user
         )
         if len(questions) == 0:
@@ -160,8 +160,8 @@ class SellectedQuestionsDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return SellectedQuestion.objects.get(pk=pk)
-        except SellectedQuestion.DoesNotExist:
+            return SellectedQuestions.objects.get(pk=pk)
+        except SellectedQuestions.DoesNotExist:
             raise NotFound
 
     def put(self, request, pk):
