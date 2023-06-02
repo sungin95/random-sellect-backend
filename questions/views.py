@@ -22,6 +22,12 @@ import random
 from .functions import page_nation
 
 
+class TotalQuestions(APIView):
+    def get(self, request):
+        total_questions = Questions.objects.all().count()
+        return Response(total_questions, status.HTTP_200_OK)
+
+
 class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -29,7 +35,7 @@ class QuestionsList(APIView):
         (start, end) = page_nation(request, settings.PAGE_SIZE)
         all_questions = Questions.objects.all().order_by("-count")[start:end]
         serializer = QuestionsSerializer(all_questions, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     # 질문 만들기, 나의 질문에 추가하기
     @transaction.atomic(using="default")
@@ -73,6 +79,14 @@ class QuestionsDetail(APIView):
 #######################################################
 
 
+class TotalGetSellectedQuestions(APIView):
+    def get(self, request):
+        total_sellected_questions = SellectedQuestions.objects.filter(
+            user=request.user
+        ).count()
+        return Response(total_sellected_questions, status.HTTP_200_OK)
+
+
 # 내 질문 목록 보기(get)
 class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
@@ -81,7 +95,7 @@ class GetSellectedQuestions(APIView):
         (start, end) = page_nation(request, settings.PAGE_SIZE)
         questions = SellectedQuestions.objects.filter(user=request.user)[start:end]
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status.HTTP_200_OK)
 
 
 class SellectedQuestionStart(APIView):
@@ -111,7 +125,7 @@ class SellectedQuestionStart(APIView):
     def get(self, request):
         sellectedquestion = self.start(request)
         serializer = ShowSellectedQuestionSerializer(sellectedquestion)
-        return Response(serializer.data)
+        return Response(serializer.data, status.HTTP_200_OK)
 
 
 # 생성(post),
