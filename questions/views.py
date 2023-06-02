@@ -17,14 +17,17 @@ from .serializers import (
 )
 from django.db import transaction
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from config import settings
 import random
+from .functions import page_nation
 
 
 class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        all_questions = Questions.objects.all().order_by("-count")
+        (start, end) = page_nation(request, settings.PAGE_SIZE)
+        all_questions = Questions.objects.all().order_by("-count")[start:end]
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data)
 
@@ -75,7 +78,8 @@ class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        questions = SellectedQuestions.objects.filter(user=request.user)
+        (start, end) = page_nation(request, settings.PAGE_SIZE)
+        questions = SellectedQuestions.objects.filter(user=request.user)[start:end]
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
         return Response(serializer.data)
 
