@@ -25,7 +25,8 @@ from .functions import page_nation
 class TotalQuestions(APIView):
     def get(self, request):
         total_questions = Questions.objects.all().count()
-        return Response(total_questions, status.HTTP_200_OK)
+        list_total_questions = [total_questions]
+        return Response(list_total_questions, status.HTTP_200_OK)
 
 
 class QuestionsList(APIView):
