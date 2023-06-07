@@ -6,7 +6,7 @@ urlpatterns = [
     path("<int:page>", views.QuestionsList.as_view()),
     path("<int:pk>/delete", views.QuestionsDetail.as_view()),
     # sellected
-    path("sellected/", views.GetSellectedQuestions.as_view()),
+    path("sellected/page/<int:page>", views.GetSellectedQuestions.as_view()),
     path("sellected/total", views.TotalGetSellectedQuestions.as_view()),
     path("sellected/start", views.SellectedQuestionStart.as_view()),
     path("sellected/<int:pk>", views.SellectQuestion.as_view()),

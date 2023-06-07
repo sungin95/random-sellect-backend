@@ -85,15 +85,16 @@ class TotalGetSellectedQuestions(APIView):
         total_sellected_questions = SellectedQuestions.objects.filter(
             user=request.user
         ).count()
-        return Response(total_sellected_questions, status.HTTP_200_OK)
+        list_total_sellected_questions = [total_sellected_questions]
+        return Response(list_total_sellected_questions, status.HTTP_200_OK)
 
 
 # 내 질문 목록 보기(get)
 class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        (start, end) = page_nation(request, settings.PAGE_SIZE)
+    def get(self, request, page):
+        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
         questions = SellectedQuestions.objects.filter(user=request.user)[start:end]
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
