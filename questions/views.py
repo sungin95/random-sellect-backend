@@ -32,8 +32,8 @@ class TotalQuestions(APIView):
 class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get(self, request):
-        (start, end) = page_nation(request, settings.PAGE_SIZE)
+    def get(self, request, page):
+        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
         all_questions = Questions.objects.all().order_by("-count")[start:end]
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data, status.HTTP_200_OK)

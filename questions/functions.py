@@ -1,6 +1,5 @@
-def page_nation(request, page_size):
+def page_nation(request, page_size, page):
     try:
-        page = request.query_params.get("page", 1)
         page = int(page)
     except ValueError:
         page = 1
