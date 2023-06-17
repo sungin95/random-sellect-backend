@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path("total", views.TotalQuestions.as_view()),
     path("<int:page>", views.QuestionsList.as_view()),
+    path("create", views.QuestionCreate.as_view()),
     path("<int:pk>/delete", views.QuestionsDetail.as_view()),
     # sellected
     path("sellected/page/<int:page>", views.GetSellectedQuestions.as_view()),

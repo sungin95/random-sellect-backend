@@ -38,6 +38,8 @@ class QuestionsList(APIView):
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
+
+class QuestionCreate(APIView):
     # 질문 만들기, 나의 질문에 추가하기
     @transaction.atomic(using="default")
     def post(self, request):
