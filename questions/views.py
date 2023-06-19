@@ -160,9 +160,8 @@ class SellectQuestion(APIView):
                 question.save()
 
                 return Response(
-                    {
-                        "ok": "ok",
-                    },
+                    {"ok": "ok"},
+                    status=status.HTTP_200_OK,
                 )
             else:
                 return Response(

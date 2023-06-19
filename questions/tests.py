@@ -9,8 +9,9 @@ from .models import *
     - TotalQuestions 작동 o
     - QuestionCreate 작동 x
     - QuestionDelete 작동 x
-    - TotalGetSellectedQuestions 작동 o
-    - GetSellectedQuestions 작동 o
+
+    - TotalGetSellectedQuestions 작동 x (request.user가 필요해서 실험x)
+    - GetSellectedQuestions 작동 x
     - SellectedQuestionStart 작동 x
     - SellectQuestion 작동 x
     - SellectedQuestionsDetail 작동 x
@@ -54,12 +55,46 @@ class TestQuestionsLogout(APITestCase):
             "status code isn't 403.",
         )
 
-    # def test_TotalQuestions(self):
-    #     response = self.client.get(self.URL + "total")
-    #     data = response.json()
 
+class TestSellectedQuestionsLogout(APITestCase):
+    URL = "/api/v1/questions/sellected/"
+
+    def test_GetSellectedQuestions(self):
+        response = self.client.get(self.URL + "page/1")
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
+
+    # def test_TotalGetSellectedQuestions(self):
+    #     response = self.client.get(self.URL + "total")
     #     self.assertEqual(
     #         response.status_code,
-    #         200,
-    #         "status code isn't 200.",
+    #         403,
+    #         "status code isn't 403.",
     #     )
+
+    def test_SellectedQuestionStart(self):
+        response = self.client.get(self.URL + "start")
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
+
+    def test_SellectQuestion(self):
+        response = self.client.get(self.URL + "1")
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
+
+    def test_SellectedQuestionsDetail(self):
+        response = self.client.get(self.URL + "1/detail")
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
