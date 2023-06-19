@@ -73,6 +73,12 @@ class QuestionDelete(APIView):
     # 질문 만들기, 나의 질문에 추가하기
     permission_classes = [IsAuthenticated]
 
+    def get_object(self, pk):
+        try:
+            return Questions.objects.get(pk=pk)
+        except Questions.DoesNotExist:
+            raise NotFound
+
     def delete(self, request, pk):
         question = self.get_object(pk)
         question.delete()
@@ -211,7 +217,7 @@ class SellectedQuestionsDetail(APIView):
             )
 
     def delete(self, request, pk):
-        sellectedQuestion = self.get_object(pk)
+        sellectedQuestion = self.get_object(pk=pk)
         # 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
