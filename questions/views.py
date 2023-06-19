@@ -156,12 +156,13 @@ class SellectQuestion(APIView):
             description=question.description, user=request.user
         )
         if len(questions) == 0:
+            print(QuestionsCreateSerializer(question).data)
             sellectedQuestionSerializer = SellectedQuestionSerializer(
                 data=QuestionsCreateSerializer(question).data
             )
             if sellectedQuestionSerializer.is_valid():
                 sellectedQuestionSerializer.save(
-                    question=question,
+                    description=question.description,
                     user=request.user,
                 )
                 question.count += 1
