@@ -41,6 +41,8 @@ class QuestionsList(APIView):
 
 class QuestionCreate(APIView):
     # 질문 만들기, 나의 질문에 추가하기
+    permission_classes = [IsAuthenticated]
+
     @transaction.atomic(using="default")
     def post(self, request):
         try:
@@ -66,12 +68,10 @@ class QuestionCreate(APIView):
         return Response({"message": "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class QuestionsDetail(APIView):
-    def get_object(self, pk):
-        try:
-            return Questions.objects.get(pk=pk)
-        except Questions.DoesNotExist:
-            raise NotFound
+# 아직 사용 안하고 있음
+class QuestionDelete(APIView):
+    # 질문 만들기, 나의 질문에 추가하기
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
         question = self.get_object(pk)
