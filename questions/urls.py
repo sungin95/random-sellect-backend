@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_admin
 
 urlpatterns = [
     path("total", views.TotalQuestions.as_view()),
@@ -12,4 +13,6 @@ urlpatterns = [
     path("sellected/start", views.SellectedQuestionStart.as_view()),
     path("sellected/<int:pk>", views.SellectQuestion.as_view()),
     path("sellected/<int:pk>/detail", views.SellectedQuestionsDetail.as_view()),
+    # admin
+    path("admin", views_admin.ConnectQuestion.as_view()),
 ]

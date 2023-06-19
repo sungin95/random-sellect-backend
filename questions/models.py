@@ -25,3 +25,10 @@ class SellectedQuestions(Question):
         on_delete=models.CASCADE,
     )
     importance = models.PositiveIntegerField(default=3)
+    question = models.ForeignKey(
+        "Questions",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,  # 나중에 삭제
+        related_name="questions_set",
+    )

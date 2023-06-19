@@ -229,14 +229,14 @@ class TestSellectedQuestionsLogin(APITestCase):
             "status code isn't 200.",
         )
 
-    # def test_SellectQuestion(self):
-    #     # print(str(self.question.pk))
-    #     response = self.client.post(self.URL + "1")
-    #     self.assertEqual(
-    #         response.status_code,
-    #         200,
-    #         "status code isn't 200.",
-    #     )
+    def test_SellectQuestion(self):
+        # print(str(self.question.pk))
+        response = self.client.post(self.URL + "1")
+        self.assertEqual(
+            response.status_code,
+            200,
+            "status code isn't 200.",
+        )
 
     # def test_SellectedQuestionsDetail_put(self):
     #     response = self.client.put(self.URL + "1/detail")
