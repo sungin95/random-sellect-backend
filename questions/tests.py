@@ -128,7 +128,7 @@ class TestQuestionsLogin(APITestCase):
 
     def setUp(self):
         user = User.objects.create(
-            username="test",
+            username="testuser",
         )
         user.set_password("123")
         user.save()
@@ -184,3 +184,72 @@ class TestQuestionsLogin(APITestCase):
             204,
             "status code isn't 204.",
         )
+
+
+class TestSellectedQuestionsLogin(APITestCase):
+    URL = "/api/v1/questions/sellected/"
+    DESCRIPTION = "test description"
+
+    def setUp(self):
+        user = User.objects.create(
+            username="testuser",
+        )
+        user.set_password("123")
+        user.save()
+        self.user = user
+        self.client.force_login(
+            self.user,
+        )
+        self.question = Questions.objects.create(
+            description=self.DESCRIPTION,
+            authon=self.user,
+        )
+
+    def test_GetSellectedQuestions(self):
+        response = self.client.get(self.URL + "page/1")
+        self.assertEqual(
+            response.status_code,
+            200,
+            "status code isn't 200.",
+        )
+
+    def test_TotalGetSellectedQuestions(self):
+        response = self.client.get(self.URL + "total")
+        self.assertEqual(
+            response.status_code,
+            200,
+            "status code isn't 200.",
+        )
+
+    def test_SellectedQuestionStart(self):
+        response = self.client.get(self.URL + "start")
+        self.assertEqual(
+            response.status_code,
+            200,
+            "status code isn't 200.",
+        )
+
+    # def test_SellectQuestion(self):
+    #     # print(str(self.question.pk))
+    #     response = self.client.post(self.URL + "1")
+    #     self.assertEqual(
+    #         response.status_code,
+    #         200,
+    #         "status code isn't 200.",
+    #     )
+
+    # def test_SellectedQuestionsDetail_put(self):
+    #     response = self.client.put(self.URL + "1/detail")
+    #     self.assertEqual(
+    #         response.status_code,
+    #         403,
+    #         "status code isn't 403.",
+    #     )
+
+    # def test_SellectedQuestionsDetail_delete(self):
+    #     response = self.client.delete(self.URL + "1/detail")
+    #     self.assertEqual(
+    #         response.status_code,
+    #         403,
+    #         "status code isn't 403.",
+    #     )

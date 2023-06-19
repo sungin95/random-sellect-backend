@@ -70,7 +70,6 @@ class QuestionCreate(APIView):
 
 # 아직 사용 안하고 있음
 class QuestionDelete(APIView):
-    # 질문 만들기, 나의 질문에 추가하기
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
@@ -81,6 +80,7 @@ class QuestionDelete(APIView):
 
     def delete(self, request, pk):
         question = self.get_object(pk)
+        # 작성자 검증
         if question.authon != request.user:
             raise PermissionDenied
         question.delete()
@@ -153,7 +153,7 @@ class SellectQuestion(APIView):
     def post(self, request, pk):
         question = self.get_object(pk)
         questions = SellectedQuestions.objects.filter(
-            question=question, user=request.user
+            description=question.description, user=request.user
         )
         if len(questions) == 0:
             sellectedQuestionSerializer = SellectedQuestionSerializer(
@@ -195,7 +195,7 @@ class SellectedQuestionsDetail(APIView):
 
     def put(self, request, pk):
         sellectedQuestion = self.get_object(pk)
-        # 검증
+        # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
         if request.data["importance"]:
@@ -220,7 +220,7 @@ class SellectedQuestionsDetail(APIView):
 
     def delete(self, request, pk):
         sellectedQuestion = self.get_object(pk=pk)
-        # 검증
+        # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
 
