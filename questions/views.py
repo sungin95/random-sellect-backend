@@ -81,6 +81,8 @@ class QuestionDelete(APIView):
 
     def delete(self, request, pk):
         question = self.get_object(pk)
+        if question.authon != request.user:
+            raise PermissionDenied
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
