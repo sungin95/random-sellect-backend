@@ -58,6 +58,7 @@ class QuestionCreate(APIView):
                     if questionUserSerializer.is_valid():
                         questionUserSerializer.save(
                             user=request.user,
+                            question=question,
                         )
                         return Response(
                             QuestionsSerializer(question).data,
@@ -163,6 +164,7 @@ class SellectQuestion(APIView):
             if sellectedQuestionSerializer.is_valid():
                 sellectedQuestionSerializer.save(
                     user=request.user,
+                    question=question,
                 )
                 question.count += 1
                 question.save()

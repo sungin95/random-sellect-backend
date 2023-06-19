@@ -230,8 +230,7 @@ class TestSellectedQuestionsLogin(APITestCase):
         )
 
     def test_SellectQuestion(self):
-        # print(str(self.question.pk))
-        response = self.client.post(self.URL + "1")
+        response = self.client.post(self.URL + str(self.question.pk))
         self.assertEqual(
             response.status_code,
             200,
