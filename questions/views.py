@@ -79,8 +79,8 @@ class QuestionDelete(APIView):
         except Questions.DoesNotExist:
             raise NotFound
 
-    def delete(self, request, pk):
-        question = self.get_object(pk)
+    def delete(self, request, questions_pk):
+        question = self.get_object(questions_pk)
         # 작성자 검증
         if question.authon != request.user:
             raise PermissionDenied
@@ -92,6 +92,8 @@ class QuestionDelete(APIView):
 
 
 class TotalGetSellectedQuestions(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         total_sellected_questions = SellectedQuestions.objects.filter(
             user=request.user
@@ -151,8 +153,8 @@ class SellectQuestion(APIView):
         except Questions.DoesNotExist:
             raise NotFound
 
-    def post(self, request, pk):
-        question = self.get_object(pk)
+    def post(self, request, questions_pk):
+        question = self.get_object(questions_pk)
         questions = SellectedQuestions.objects.filter(
             user=request.user,
             description=question.description,
@@ -170,7 +172,7 @@ class SellectQuestion(APIView):
                 question.save()
 
                 return Response(
-                    {"ok": "ok"},
+                    sellectedQuestionSerializer.data,
                     status=status.HTTP_200_OK,
                 )
             else:
@@ -195,24 +197,30 @@ class SellectedQuestionsDetail(APIView):
         except SellectedQuestions.DoesNotExist:
             raise NotFound
 
-    def put(self, request, pk):
-        sellectedQuestion = self.get_object(pk)
+    # importance만 처리 되도록 되어있음
+    def put(self, request, sq_pk):
+        sellectedQuestion = self.get_object(sq_pk)
         # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
+        # testcode통과를 위해 data_dict를 따로 만들었습니다.
+        # request.data["importance"]를 직접 변경하니까 변경할수 없다는 에러 발생
+        data_dict = {}
         if request.data["importance"]:
-            importance_ = int(request.data["importance"])
-            importance_ += sellectedQuestion.importance
-            request.data["importance"] = importance_
+            data_dict["importance"] = sellectedQuestion.importance + int(
+                request.data["importance"]
+            )
+
         serializer = ImportanceSellectedQuestionSerializer(
             sellectedQuestion,
-            data=request.data,
+            data=data_dict,
             partial=True,
         )
         if serializer.is_valid():
             updated_importance = serializer.save()
             return Response(
-                ImportanceSellectedQuestionSerializer(updated_importance).data
+                ImportanceSellectedQuestionSerializer(updated_importance).data,
+                status=status.HTTP_201_CREATED,
             )
         else:
             return Response(
@@ -220,12 +228,11 @@ class SellectedQuestionsDetail(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def delete(self, request, pk):
-        sellectedQuestion = self.get_object(pk=pk)
+    def delete(self, request, sq_pk):
+        sellectedQuestion = self.get_object(sq_pk)
         # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
-
         q = sellectedQuestion.question
         q.count -= 1
         q.save()

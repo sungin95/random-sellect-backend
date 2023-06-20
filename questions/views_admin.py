@@ -6,6 +6,7 @@ from rest_framework.exceptions import ParseError
 from django.db import transaction
 
 
+# 새로 추가된 모델에 적절한 값을 넣어주기 위한 함수
 class ConnectQuestion(APIView):
     @transaction.atomic(using="default")
     def get(self, request):
