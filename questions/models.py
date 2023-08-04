@@ -1,5 +1,6 @@
 from django.db import models
 from common.models import CommonModel
+from users.models import User
 
 
 class Question(CommonModel):
@@ -17,6 +18,17 @@ class Questions(Question):
     )
     count = models.PositiveIntegerField(default=1)
 
+    def create_test_list(n: int, user: User):
+        questions_list = []
+        for i in range(n):
+            questions_list.append(
+                Questions.objects.create(
+                    description="test description " + str(i),
+                    authon=user,
+                )
+            )
+        return questions_list
+
 
 # 개인 질문 모음
 class SellectedQuestions(Question):
@@ -29,6 +41,14 @@ class SellectedQuestions(Question):
         "Questions",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,  # 나중에 삭제
         related_name="questions_set",
     )
+
+    def create_test(user: User, question_pk: Questions):
+        question = Questions.objects.get(pk=question_pk)
+        sellected_question = SellectedQuestions.objects.create(
+            description=question.description,
+            user=user,
+            question=question,
+        )
+        return sellected_question

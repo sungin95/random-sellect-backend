@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 from users.models import User
-from .models import *
+from questions.models import Questions, SellectedQuestions
 
 """
 1. 로그인 안한 상황
@@ -194,19 +194,13 @@ class TestQuestionsLogin(APITestCase):
     DESCRIPTION = "test description"
 
     def setUp(self):
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
+        user_list = User.create_test_list(1)
+        self.user = user_list[0]
         self.client.force_login(
             self.user,
         )
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
+        questions_list = Questions.create_test_list(1, self.user)
+        self.question = questions_list[0]
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -253,7 +247,9 @@ class TestQuestionsLogin(APITestCase):
         )
 
     def test_QuestionDelete(self):
-        response = self.client.delete(self.URL + "delete/" + str(self.question.pk))
+        response = self.client.delete(
+            self.URL + "delete/" + str(self.question.pk),
+        )
         self.assertEqual(
             response.status_code,
             204,
@@ -263,22 +259,17 @@ class TestQuestionsLogin(APITestCase):
 
 class TestSellectedQuestionsLogin(APITestCase):
     URL = "/api/v1/questions/sellected/"
-    DESCRIPTION = "test description"
 
     def setUp(self):
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
+        # user 1명 생성 및 로그인
+        user_list = User.create_test_list(1)
+        self.user = user_list[0]
         self.client.force_login(
             self.user,
         )
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
+        # Questions 1개 생성 및 선택
+        questions_list = Questions.create_test_list(1, self.user)
+        self.question = questions_list[0]
 
     def test_GetSellectedQuestions(self):
         response = self.client.get(self.URL + "page/1")
@@ -331,10 +322,21 @@ class TestSellectedQuestionsLogin(APITestCase):
         )
 
     def test_SellectQuestion_3(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
+        )
+        response = self.client.post(self.URL + str(self.question.pk))
+        self.assertEqual(
+            response.status_code,
+            406,
+            "status code isn't 406.",
+        )
+
+    def test_SellectQuestion_4(self):
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
         )
         response = self.client.post(self.URL + str(self.question.pk))
         data = response.json()
@@ -344,14 +346,29 @@ class TestSellectedQuestionsLogin(APITestCase):
             "개인 질문이 중복 생성되었습니다.",
         )
 
-    def test_SellectedQuestionsDetail_put_1(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
+
+class TestSellectedQuestionsLoginDetail(APITestCase):
+    def setUp(self):
+        # user 1명 생성 및 로그인
+        user_list = User.create_test_list(1)
+        self.user = user_list[0]
+        self.client.force_login(
+            self.user,
         )
+        # Questions 1개 생성 및 선택
+        questions_list = Questions.create_test_list(1, self.user)
+        self.question = questions_list[0]
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
+        )
+        self.URL = (
+            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+        )
+
+    def test_SellectedQuestionsDetail_put_1(self):
         response = self.client.put(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
             data={
                 "importance": 5,
             },
@@ -364,13 +381,9 @@ class TestSellectedQuestionsLogin(APITestCase):
 
     def test_SellectedQuestionsDetail_put_2(self):
         num = 3
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
-        )
+
         response = self.client.put(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
             data={
                 "importance": num,
             },
@@ -383,36 +396,14 @@ class TestSellectedQuestionsLogin(APITestCase):
         )
 
     def test_SellectedQuestionsDetail_delete_1(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
-        )
         response = self.client.delete(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
         )
         self.assertEqual(
             response.status_code,
             204,
             "status code isn't 204.",
         )
-
-    # def test_SellectedQuestionsDetail_delete_2(self):
-    #     self.sellected_question = SellectedQuestions.objects.create(
-    #         description=self.question.description,
-    #         user=self.user,
-    #         question=self.question,
-    #     )
-    #     response = self.client.delete(
-    #         self.URL + str(self.sellected_question.pk) + "/detail",
-    #     )
-    #     data = response.json()
-    #     print(data)
-    #     self.assertEqual(
-    #         response.status_code,
-    #         204,
-    #         "status code isn't 204.",
-    #     )
 
 
 """
@@ -427,35 +418,23 @@ class TestSellectedQuestionsLogin(APITestCase):
 
 
 class TestQuestionsLoginOtherUser(APITestCase):
-    URL = "/api/v1/questions/"
-    DESCRIPTION = "test description"
-
     def setUp(self):
         # user
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
-        # user가 Questions생성
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
-        # user_other
-        user_other = User.objects.create(
-            username="testuser_other",
-        )
-        user_other.set_password("123")
-        user_other.save()
-        self.user_other = user_other
+        user = User.create_test_list(2)
+        self.user = user[0]
+        self.user_other = user[1]
+
+        # user_other가 로그인, user가 Questions생성
         self.client.force_login(
             self.user_other,
         )
+        questions = Questions.create_test_list(1, self.user)
+        self.question = questions[0]
+
+        self.URL = "/api/v1/questions/delete/" + str(self.question.pk)
 
     def test_QuestionDelete(self):
-        response = self.client.delete(self.URL + "delete/" + str(self.question.pk))
+        response = self.client.delete(self.URL)
         self.assertEqual(
             response.status_code,
             403,
@@ -469,31 +448,21 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
 
     def setUp(self):
         # user
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
-        # user_other
-        user_other = User.objects.create(
-            username="testuser_other",
-        )
-        user_other.set_password("123")
-        user_other.save()
-        self.user_other = user_other
+        user = User.create_test_list(2)
+        self.user = user[0]
+        self.user_other = user[1]
+
+        # user_other가 로그인, user가 Questions생성
         self.client.force_login(
             self.user_other,
         )
+        questions = Questions.create_test_list(1, self.user)
+        self.question = questions[0]
+
         # user가 Question선택해서 개인질문 생성
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
         )
 
     def test_SellectedQuestionsDetail_put(self):

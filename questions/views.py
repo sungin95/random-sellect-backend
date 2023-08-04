@@ -155,13 +155,14 @@ class SellectQuestion(APIView):
         except Questions.DoesNotExist:
             raise NotFound
 
-    def post(self, request, questions_pk):
-        question = self.get_object(questions_pk)
-        questions = SellectedQuestions.objects.filter(
+    def post(self, request, question_pk):
+        question = self.get_object(question_pk)
+        # 이미 선택했나 확인 => 없으면(0) 생성, 있으면(!0) 406 에러
+        sellected_questions = SellectedQuestions.objects.filter(
             user=request.user,
-            description=question.description,
+            question=question.pk,
         )
-        if len(questions) == 0:
+        if len(sellected_questions) == 0:
             sellectedQuestionSerializer = SellectedQuestionSerializer(
                 data=QuestionsCreateSerializer(question).data
             )
