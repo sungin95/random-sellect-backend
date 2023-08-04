@@ -443,7 +443,6 @@ class TestQuestionsLoginOtherUser(APITestCase):
 
 
 class TestSellectedQuestionsLoginOtherUser(APITestCase):
-    URL = "/api/v1/questions/sellected/"
     DESCRIPTION = "test description"
 
     def setUp(self):
@@ -464,10 +463,13 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
             self.user,
             self.question.pk,
         )
+        self.URL = (
+            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+        )
 
     def test_SellectedQuestionsDetail_put(self):
         response = self.client.put(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
             data={
                 "importance": 5,
             },
@@ -480,7 +482,7 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
 
     def test_SellectedQuestionsDetail_delete(self):
         response = self.client.delete(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
         )
         self.assertEqual(
             response.status_code,
