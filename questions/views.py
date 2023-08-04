@@ -108,7 +108,9 @@ class GetSellectedQuestions(APIView):
 
     def get(self, request, page):
         (start, end) = page_nation(request, settings.PAGE_SIZE, page)
-        questions = SellectedQuestions.objects.filter(user=request.user)[start:end]
+        questions = SellectedQuestions.objects.filter(
+            user=request.user,
+        )[start:end]
         serializer = ShowSellectedQuestionSerializer(questions, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 

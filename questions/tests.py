@@ -2,6 +2,56 @@ from rest_framework.test import APITestCase
 from users.models import User
 from .models import *
 
+"""
+1. 로그인 안한 상황
+    공용 질문
+    - QuestionsList 작동 o
+    - TotalQuestions 작동 o
+    - QuestionCreate 작동 x
+    - QuestionDelete 작동 x
+
+    개인 질문
+    - TotalGetSellectedQuestions 작동 x
+    - GetSellectedQuestions 작동 x
+    - SellectedQuestionStart 작동 x
+    - SellectQuestion 작동 x
+    - SellectedQuestionsDetail 작동 x
+
+2. 로그인 한 상황, 본인 작성한거 작업
+    # 공용 질문
+    - QuestionsList 작동 o
+    - TotalQuestions 작동 o
+        -1 status 200체크
+        -2 타입 int체크
+    - QuestionCreate 작동 o
+    - QuestionDelete 작동 o
+
+    # 개인 질문
+    - TotalGetSellectedQuestions 작동 o
+        -1 status 200체크
+        -2 타입 int체크
+    - GetSellectedQuestions 작동 o
+    - SellectedQuestionStart 작동 o
+    - SellectQuestion 작동 o
+        -1 200체크
+        -2 description 잘 복사 되었는지 체크
+        -3 중복생성 막는 기능 있는지
+    - test_SellectedQuestionsDetail_put 작동 o
+        -1 201체크
+        -2 importance값 잘 적용되었는지 체크
+    - test_SellectedQuestionsDetail_delete 작동 o
+        - 204체크
+        - count -1 확인(테스트 실패, 주석처리)
+
+3. 로그인 한 상황, 남이 작성한거 작업(보안테스트)
+    # 공용 질문
+    - QuestionDelete 작동 x
+
+    # 개인 질문
+    - test_SellectedQuestionsDetail_put 작동 x
+    - test_SellectedQuestionsDetail_delete 작동 x
+"""
+
 
 """
 1. 로그인 안한 상황
@@ -388,6 +438,7 @@ class TestQuestionsLoginOtherUser(APITestCase):
         user.set_password("123")
         user.save()
         self.user = user
+        # user가 Questions생성
         self.question = Questions.objects.create(
             description=self.DESCRIPTION,
             authon=self.user,
@@ -438,13 +489,14 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
         self.client.force_login(
             self.user_other,
         )
-
-    def test_SellectedQuestionsDetail_put(self):
+        # user가 Question선택해서 개인질문 생성
         self.sellected_question = SellectedQuestions.objects.create(
             description=self.question.description,
             user=self.user,
             question=self.question,
         )
+
+    def test_SellectedQuestionsDetail_put(self):
         response = self.client.put(
             self.URL + str(self.sellected_question.pk) + "/detail",
             data={
@@ -458,11 +510,6 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
         )
 
     def test_SellectedQuestionsDetail_delete(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
-        )
         response = self.client.delete(
             self.URL + str(self.sellected_question.pk) + "/detail",
         )

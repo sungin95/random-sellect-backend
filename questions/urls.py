@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from . import views_admin
+
+# from . import views_admin
 
 urlpatterns = [
     path("total", views.TotalQuestions.as_view()),
