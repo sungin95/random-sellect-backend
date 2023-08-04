@@ -2,6 +2,8 @@ from django.db import models
 from common.models import CommonModel
 from users.models import User
 from rest_framework.exceptions import NotFound
+from django.db import transaction
+from rest_framework.exceptions import ParseError
 
 
 class Question(CommonModel):
@@ -17,7 +19,7 @@ class Questions(Question):
         "users.User",
         on_delete=models.CASCADE,
     )
-    count = models.PositiveIntegerField(default=1)
+    count = models.PositiveIntegerField(default=0)
 
     def get_object(pk):
         try:
@@ -28,12 +30,16 @@ class Questions(Question):
     def create_test_list(n: int, user: User):
         questions_list = []
         for i in range(n):
-            questions_list.append(
-                Questions.objects.create(
-                    description="test description " + str(i),
-                    authon=user,
-                )
+            question = Questions.objects.create(
+                description="test description " + str(i),
+                authon=user,
             )
+            # 질문 만들면 나의 질문에도 자동 추가
+            sellected_question = SellectedQuestions.create_test(
+                user,
+                question.pk,
+            )
+            questions_list.append((question, sellected_question))
         return questions_list
 
 
@@ -57,11 +63,29 @@ class SellectedQuestions(Question):
         except SellectedQuestions.DoesNotExist:
             raise NotFound
 
+    @transaction.atomic(using="default")
     def create_test(user: User, question_pk: Questions):
-        question = Questions.objects.get(pk=question_pk)
-        sellected_question = SellectedQuestions.objects.create(
-            description=question.description,
-            user=user,
-            question=question,
-        )
-        return sellected_question
+        try:
+            with transaction.atomic():
+                question = Questions.objects.get(pk=question_pk)
+                question.count += 1
+                question.save()
+                sellected_question = SellectedQuestions.objects.create(
+                    description=question.description,
+                    user=user,
+                    question=question,
+                )
+                return sellected_question
+        except:
+            raise ParseError
+
+    @transaction.atomic(using="default")
+    def delete_count(self, question_pk: int):
+        try:
+            with transaction.atomic():
+                question = Questions.get_object(question_pk)
+                question.count -= 1
+                question.save()
+                self.delete()
+        except:
+            raise ParseError

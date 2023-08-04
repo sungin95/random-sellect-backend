@@ -213,13 +213,12 @@ class SellectedQuestionsDetail(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+    # delete메소드는 Response에 본문을 추가할 수 없어서 count-1이 되는지 테스트 케이스 작성 X
     def delete(self, request, sq_pk):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
         # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
-        q = sellectedQuestion.question
-        q.count -= 1
-        q.save()
-        sellectedQuestion.delete()
+        question_pk = sellectedQuestion.question.pk
+        sellectedQuestion.delete_count(question_pk)
         return Response(status=status.HTTP_204_NO_CONTENT)

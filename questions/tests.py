@@ -200,7 +200,7 @@ class TestQuestionsLogin(APITestCase):
             self.user,
         )
         questions_list = Questions.create_test_list(1, self.user)
-        self.question = questions_list[0]
+        self.question = questions_list[0][0]
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -262,14 +262,15 @@ class TestSellectedQuestionsLogin(APITestCase):
 
     def setUp(self):
         # user 1명 생성 및 로그인
-        user_list = User.create_test_list(1)
-        self.user = user_list[0]
+        user_list = User.create_test_list(2)
+        self.user_owner = user_list[0]
+        self.user = user_list[1]
         self.client.force_login(
             self.user,
         )
         # Questions 1개 생성 및 선택
-        questions_list = Questions.create_test_list(1, self.user)
-        self.question = questions_list[0]
+        questions_list = Questions.create_test_list(1, self.user_owner)
+        self.question = questions_list[0][0]
 
     def test_GetSellectedQuestions(self):
         response = self.client.get(self.URL + "page/1")
@@ -349,15 +350,16 @@ class TestSellectedQuestionsLogin(APITestCase):
 
 class TestSellectedQuestionsLoginDetail(APITestCase):
     def setUp(self):
-        # user 1명 생성 및 로그인
-        user_list = User.create_test_list(1)
-        self.user = user_list[0]
+        # user 2명 생성 및 로그인
+        user_list = User.create_test_list(2)
+        self.user_owner = user_list[0]
+        self.user = user_list[1]
         self.client.force_login(
             self.user,
         )
         # Questions 1개 생성 및 선택
-        questions_list = Questions.create_test_list(1, self.user)
-        self.question = questions_list[0]
+        questions_list = Questions.create_test_list(1, self.user_owner)
+        self.question = questions_list[0][0]
         self.sellected_question = SellectedQuestions.create_test(
             self.user,
             self.question.pk,
@@ -429,7 +431,7 @@ class TestQuestionsLoginOtherUser(APITestCase):
             self.user_other,
         )
         questions = Questions.create_test_list(1, self.user)
-        self.question = questions[0]
+        self.question = questions[0][0]
 
         self.URL = "/api/v1/questions/delete/" + str(self.question.pk)
 
@@ -456,7 +458,7 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
             self.user_other,
         )
         questions = Questions.create_test_list(1, self.user)
-        self.question = questions[0]
+        self.question = questions[0][0]
 
         # user가 Question선택해서 개인질문 생성
         self.sellected_question = SellectedQuestions.create_test(
