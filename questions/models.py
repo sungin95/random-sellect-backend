@@ -1,6 +1,7 @@
 from django.db import models
 from common.models import CommonModel
 from users.models import User
+from rest_framework.exceptions import NotFound
 
 
 class Question(CommonModel):
@@ -17,6 +18,12 @@ class Questions(Question):
         on_delete=models.CASCADE,
     )
     count = models.PositiveIntegerField(default=1)
+
+    def get_object(pk):
+        try:
+            return Questions.objects.get(pk=pk)
+        except Questions.DoesNotExist:
+            raise NotFound
 
     def create_test_list(n: int, user: User):
         questions_list = []
@@ -43,6 +50,12 @@ class SellectedQuestions(Question):
         null=True,
         related_name="questions_set",
     )
+
+    def get_object(pk):
+        try:
+            return SellectedQuestions.objects.get(pk=pk)
+        except SellectedQuestions.DoesNotExist:
+            raise NotFound
 
     def create_test(user: User, question_pk: Questions):
         question = Questions.objects.get(pk=question_pk)

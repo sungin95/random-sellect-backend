@@ -1,4 +1,4 @@
-def page_nation(request, page_size, page):
+def page_nation(page_size, page):
     try:
         page = int(page)
     except ValueError:

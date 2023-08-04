@@ -33,7 +33,7 @@ class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, page):
-        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
+        (start, end) = page_nation(settings.PAGE_SIZE, page)
         all_questions = Questions.objects.all().order_by("-count")[start:end]
         serializer = QuestionsSerializer(all_questions, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
@@ -51,7 +51,7 @@ class QuestionCreate(APIView):
                 questionsSerializer = QuestionsCreateSerializer(data=request.data)
                 if questionsSerializer.is_valid():
                     question = questionsSerializer.save(authon=request.user)
-                    # 나의 질문에 추가하기
+                    # 내가 만든 질문은 나의 질문에 자동 추가하기
                     questionUserSerializer = SellectedQuestionSerializer(
                         data=request.data
                     )
@@ -73,14 +73,8 @@ class QuestionCreate(APIView):
 class QuestionDelete(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return Questions.objects.get(pk=pk)
-        except Questions.DoesNotExist:
-            raise NotFound
-
     def delete(self, request, questions_pk):
-        question = self.get_object(questions_pk)
+        question = Questions.get_object(questions_pk)
         # 작성자 검증
         if question.authon != request.user:
             raise PermissionDenied
@@ -107,7 +101,7 @@ class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, page):
-        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
+        (start, end) = page_nation(settings.PAGE_SIZE, page)
         questions = SellectedQuestions.objects.filter(
             user=request.user,
         )[start:end]
@@ -149,14 +143,8 @@ class SellectedQuestionStart(APIView):
 class SellectQuestion(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return Questions.objects.get(pk=pk)
-        except Questions.DoesNotExist:
-            raise NotFound
-
     def post(self, request, question_pk):
-        question = self.get_object(question_pk)
+        question = Questions.get_object(question_pk)
         # 이미 선택했나 확인 => 없으면(0) 생성, 있으면(!0) 406 에러
         sellected_questions = SellectedQuestions.objects.filter(
             user=request.user,
@@ -194,15 +182,9 @@ class SellectQuestion(APIView):
 class SellectedQuestionsDetail(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return SellectedQuestions.objects.get(pk=pk)
-        except SellectedQuestions.DoesNotExist:
-            raise NotFound
-
     # importance만 처리 되도록 되어있음
     def put(self, request, sq_pk):
-        sellectedQuestion = self.get_object(sq_pk)
+        sellectedQuestion = SellectedQuestions.get_object(sq_pk)
         # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
@@ -232,7 +214,7 @@ class SellectedQuestionsDetail(APIView):
             )
 
     def delete(self, request, sq_pk):
-        sellectedQuestion = self.get_object(sq_pk)
+        sellectedQuestion = SellectedQuestions.get_object(sq_pk)
         # 작성자 검증
         if sellectedQuestion.user != request.user:
             raise PermissionDenied
