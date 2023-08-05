@@ -16,7 +16,10 @@ from .serializers import (
     ImportanceSellectedQuestionSerializer,
 )
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+)
 from config import settings
 import random
 from .functions.pageNation import page_nation

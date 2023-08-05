@@ -21,7 +21,7 @@ class Questions(Question):
     )
     count = models.PositiveIntegerField(default=0)
 
-    def get_object(pk):
+    def get_object(pk: int):
         try:
             return Questions.objects.get(pk=pk)
         except Questions.DoesNotExist:
