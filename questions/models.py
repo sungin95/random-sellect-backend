@@ -27,7 +27,11 @@ class Questions(Question):
         except Questions.DoesNotExist:
             raise NotFound
 
-    def create_test_list(n: int, user: User):
+    def count_n(self, n: int):
+        self.count += n
+        self.save()
+
+    def create_test_list(n: int, user: User) -> list:
         questions_list = []
         for i in range(n):
             question = Questions.objects.create(
@@ -57,7 +61,7 @@ class SellectedQuestions(Question):
         related_name="questions_set",
     )
 
-    def get_object(pk):
+    def get_object(pk: int) -> object:
         try:
             return SellectedQuestions.objects.get(pk=pk)
         except SellectedQuestions.DoesNotExist:
@@ -84,8 +88,7 @@ class SellectedQuestions(Question):
         try:
             with transaction.atomic():
                 question = Questions.get_object(question_pk)
-                question.count -= 1
-                question.save()
+                question.count_n(-1)
                 self.delete()
         except:
             raise ParseError

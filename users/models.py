@@ -14,7 +14,7 @@ class User(AbstractUser):
         except User.DoesNotExist:
             raise NotFound
 
-    def create_test_list(n: int):
+    def create_test_list(n: int) -> list:
         user_list = []
         for i in range(n):
             user = User.objects.create(
