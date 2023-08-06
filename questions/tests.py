@@ -394,7 +394,7 @@ class TestSellectedQuestionsLoginDetail(APITestCase):
         self.assertEqual(
             data["importance"],
             (num + self.sellected_question.importance),
-            "status code isn't 201.",
+            "importance값이 틀렸습니다.",
         )
 
     def test_SellectedQuestionsDetail_delete_1(self):
