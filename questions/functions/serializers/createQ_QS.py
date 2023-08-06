@@ -13,9 +13,9 @@ def serializer_create_Question_sellectedQuestion(request):
                 request,
                 questionSerializer["model"],
             )
-            return (
-                questionSerializer["serializer"],
-                sellectdQuestionSerializer["serializer"],
-            )
+            return {
+                "question": questionSerializer["serializer"],
+                "ellectdQuestion": sellectdQuestionSerializer["serializer"],
+            }
     except:
         return None

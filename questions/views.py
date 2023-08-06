@@ -52,10 +52,10 @@ class QuestionCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        response = serializer_create_Question_sellectedQuestion(request)
-        if response is not None:
+        serializer = serializer_create_Question_sellectedQuestion(request)
+        if serializer is not None:
             return Response(
-                response[0].data,
+                serializer["question"].data,
                 status=status.HTTP_201_CREATED,
             )
         return Response(
