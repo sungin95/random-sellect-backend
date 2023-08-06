@@ -8,7 +8,7 @@ from rest_framework.exceptions import (
 )
 from rest_framework import status
 from .models import Questions, SellectedQuestions
-from .serializers import (
+from .functions.serializers.serializers import (
     QuestionsSerializer,
     QuestionsCreateSerializer,
     SellectedQuestionSerializer,
@@ -24,6 +24,11 @@ from config import settings
 import random
 from .functions.pageNation import page_nation
 
+from .functions.serializers.createQ_QS import (
+    serializer_create_Question_sellectedQuestion,
+)
+from .functions.serializers.questions import serializer_get_questions
+
 
 class TotalQuestions(APIView):
     def get(self, request):
@@ -38,7 +43,7 @@ class QuestionsList(APIView):
     def get(self, request, page):
         (start, end) = page_nation(settings.PAGE_SIZE, page)
         all_questions = Questions.objects.all().order_by("-count")[start:end]
-        serializer = QuestionsSerializer(all_questions, many=True)
+        serializer = serializer_get_questions(all_questions)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -46,30 +51,17 @@ class QuestionCreate(APIView):
     # 질문 만들기, 나의 질문에 추가하기
     permission_classes = [IsAuthenticated]
 
-    @transaction.atomic(using="default")
     def post(self, request):
-        try:
-            with transaction.atomic():
-                # 질문 만들기
-                questionsSerializer = QuestionsCreateSerializer(data=request.data)
-                if questionsSerializer.is_valid():
-                    question = questionsSerializer.save(authon=request.user)
-                    # 내가 만든 질문은 나의 질문에 자동 추가하기
-                    questionUserSerializer = SellectedQuestionSerializer(
-                        data=request.data
-                    )
-                    if questionUserSerializer.is_valid():
-                        questionUserSerializer.save(
-                            user=request.user,
-                            question=question,
-                        )
-                        return Response(
-                            QuestionsSerializer(question).data,
-                            status=status.HTTP_201_CREATED,
-                        )
-        except:
-            pass
-        return Response({"message": "Error"}, status=status.HTTP_400_BAD_REQUEST)
+        response = serializer_create_Question_sellectedQuestion(request)
+        if response is not None:
+            return Response(
+                response[0].data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            {"message": "Error"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 # 아직 사용 안하고 있음
