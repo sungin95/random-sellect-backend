@@ -78,8 +78,8 @@ class TotalGetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        total_sellected_questions = SellectedQuestions.objects.filter(
-            user=request.user
+        total_sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
         ).count()
         list_total_sellected_questions = [total_sellected_questions]
         return Response(list_total_sellected_questions, status.HTTP_200_OK)
@@ -91,10 +91,10 @@ class GetSellectedQuestions(APIView):
 
     def get(self, request, page):
         (start, end) = page_nation(settings.PAGE_SIZE, page)
-        questions = SellectedQuestions.objects.filter(
-            user=request.user,
+        sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
         )[start:end]
-        serializer = serializer_get_sellectedQuestions(questions)
+        serializer = serializer_get_sellectedQuestions(sellected_questions)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -102,8 +102,8 @@ class SellectedQuestionStart(APIView):
     permission_classes = [IsAuthenticated]
 
     def start(self, request):
-        sellected_questions = SellectedQuestions.objects.filter(
-            user=request.user,
+        sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
         )
         if sellected_questions.exists():
             selection_probability = [

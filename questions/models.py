@@ -80,6 +80,12 @@ class SellectedQuestions(Question):
         except:
             raise ParseError
 
+    def get_login_user_of_SQ(request_user: User):
+        login_user_SQ = SellectedQuestions.objects.filter(
+            user=request_user,
+        )
+        return login_user_SQ
+
     # testcase
     @transaction.atomic(using="default")
     def create_test(user: User, question_pk: Questions):
