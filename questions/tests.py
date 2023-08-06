@@ -1,6 +1,56 @@
 from rest_framework.test import APITestCase
 from users.models import User
-from .models import *
+from questions.models import Questions, SellectedQuestions
+
+"""
+1. 로그인 안한 상황
+    공용 질문
+    - QuestionsList 작동 o
+    - TotalQuestions 작동 o
+    - QuestionCreate 작동 x
+    - QuestionDelete 작동 x
+
+    개인 질문
+    - TotalGetSellectedQuestions 작동 x
+    - GetSellectedQuestions 작동 x
+    - SellectedQuestionStart 작동 x
+    - SellectQuestion 작동 x
+    - SellectedQuestionsDetail 작동 x
+
+2. 로그인 한 상황, 본인 작성한거 작업
+    # 공용 질문
+    - QuestionsList 작동 o
+    - TotalQuestions 작동 o
+        -1 status 200체크
+        -2 타입 int체크
+    - QuestionCreate 작동 o
+    - QuestionDelete 작동 o
+
+    # 개인 질문
+    - TotalGetSellectedQuestions 작동 o
+        -1 status 200체크
+        -2 타입 int체크
+    - GetSellectedQuestions 작동 o
+    - SellectedQuestionStart 작동 o
+    - SellectQuestion 작동 o
+        -1 200체크
+        -2 description 잘 복사 되었는지 체크
+        -3 중복생성 막는 기능 있는지
+    - test_SellectedQuestionsDetail_put 작동 o
+        -1 201체크
+        -2 importance값 잘 적용되었는지 체크
+    - test_SellectedQuestionsDetail_delete 작동 o
+        - 204체크
+        - count -1 확인(테스트 실패, 주석처리)
+
+3. 로그인 한 상황, 남이 작성한거 작업(보안테스트)
+    # 공용 질문
+    - QuestionDelete 작동 x
+
+    # 개인 질문
+    - test_SellectedQuestionsDetail_put 작동 x
+    - test_SellectedQuestionsDetail_delete 작동 x
+"""
 
 
 """
@@ -144,19 +194,13 @@ class TestQuestionsLogin(APITestCase):
     DESCRIPTION = "test description"
 
     def setUp(self):
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
+        user_list = User.create_test_list(1)
+        self.user = user_list[0]
         self.client.force_login(
             self.user,
         )
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
+        questions_list = Questions.create_test_list(1, self.user)
+        self.question = questions_list[0][0]
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -203,8 +247,9 @@ class TestQuestionsLogin(APITestCase):
         )
 
     def test_QuestionDelete(self):
-        response = self.client.delete(self.URL + "delete/" + str(self.question.pk))
-        # data = response.json() # ! 이거 때문에 에러... 주의!!!
+        response = self.client.delete(
+            self.URL + "delete/" + str(self.question.pk),
+        )
         self.assertEqual(
             response.status_code,
             204,
@@ -214,22 +259,18 @@ class TestQuestionsLogin(APITestCase):
 
 class TestSellectedQuestionsLogin(APITestCase):
     URL = "/api/v1/questions/sellected/"
-    DESCRIPTION = "test description"
 
     def setUp(self):
-        user = User.objects.create(
-            username="testuser",
-        )
-        user.set_password("123")
-        user.save()
-        self.user = user
+        # user 1명 생성 및 로그인
+        user_list = User.create_test_list(2)
+        self.user_owner = user_list[0]
+        self.user = user_list[1]
         self.client.force_login(
             self.user,
         )
-        self.question = Questions.objects.create(
-            description=self.DESCRIPTION,
-            authon=self.user,
-        )
+        # Questions 1개 생성 및 선택
+        questions_list = Questions.create_test_list(1, self.user_owner)
+        self.question = questions_list[0][0]
 
     def test_GetSellectedQuestions(self):
         response = self.client.get(self.URL + "page/1")
@@ -282,10 +323,21 @@ class TestSellectedQuestionsLogin(APITestCase):
         )
 
     def test_SellectQuestion_3(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
+        )
+        response = self.client.post(self.URL + str(self.question.pk))
+        self.assertEqual(
+            response.status_code,
+            406,
+            "status code isn't 406.",
+        )
+
+    def test_SellectQuestion_4(self):
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
         )
         response = self.client.post(self.URL + str(self.question.pk))
         data = response.json()
@@ -295,14 +347,30 @@ class TestSellectedQuestionsLogin(APITestCase):
             "개인 질문이 중복 생성되었습니다.",
         )
 
-    def test_SellectedQuestionsDetail_put_1(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
+
+class TestSellectedQuestionsLoginDetail(APITestCase):
+    def setUp(self):
+        # user 2명 생성 및 로그인
+        user_list = User.create_test_list(2)
+        self.user_owner = user_list[0]
+        self.user = user_list[1]
+        self.client.force_login(
+            self.user,
         )
+        # Questions 1개 생성 및 선택
+        questions_list = Questions.create_test_list(1, self.user_owner)
+        self.question = questions_list[0][0]
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
+        )
+        self.URL = (
+            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+        )
+
+    def test_SellectedQuestionsDetail_put_1(self):
         response = self.client.put(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
             data={
                 "importance": 5,
             },
@@ -315,13 +383,9 @@ class TestSellectedQuestionsLogin(APITestCase):
 
     def test_SellectedQuestionsDetail_put_2(self):
         num = 3
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
-        )
+
         response = self.client.put(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
             data={
                 "importance": num,
             },
@@ -330,17 +394,12 @@ class TestSellectedQuestionsLogin(APITestCase):
         self.assertEqual(
             data["importance"],
             (num + self.sellected_question.importance),
-            "status code isn't 201.",
+            "importance값이 틀렸습니다.",
         )
 
     def test_SellectedQuestionsDetail_delete_1(self):
-        self.sellected_question = SellectedQuestions.objects.create(
-            description=self.question.description,
-            user=self.user,
-            question=self.question,
-        )
         response = self.client.delete(
-            self.URL + str(self.sellected_question.pk) + "/detail",
+            self.URL,
         )
         self.assertEqual(
             response.status_code,
@@ -348,48 +407,87 @@ class TestSellectedQuestionsLogin(APITestCase):
             "status code isn't 204.",
         )
 
-    # def test_SellectedQuestionsDetail_delete_2(self):
-    #     self.sellected_question = SellectedQuestions.objects.create(
-    #         description=self.question.description,
-    #         user=self.user,
-    #         question=self.question,
-    #     )
-    #     response = self.client.delete(
-    #         self.URL + str(self.sellected_question.pk) + "/detail",
-    #     )
-    #     data = response.json()
-    #     print(data)
-    #     self.assertEqual(
-    #         response.status_code,
-    #         204,
-    #         "status code isn't 204.",
-    #     )
-
 
 """
 3. 로그인 한 상황, 남이 작성한거 작업(보안테스트)
     # 공용 질문
-    - QuestionsList 작동 o
-    - TotalQuestions 작동 o
-        -1 status 200체크
-        -2 타입 int체크
-    - QuestionCreate 작동 o
-    - QuestionDelete 작동 o
+    - QuestionDelete 작동 x
 
     # 개인 질문
-    - TotalGetSellectedQuestions 작동 o
-        -1 status 200체크
-        -2 타입 int체크
-    - GetSellectedQuestions 작동 o
-    - SellectedQuestionStart 작동 o
-    - SellectQuestion 작동 o
-        -1 200체크
-        -2 description 잘 복사 되었는지 체크
-        -3 중복생성 막는 기능 있는지
-    - test_SellectedQuestionsDetail_put 작동 o
-        -1 201체크
-        -2 importance값 잘 적용되었는지 체크
-    - test_SellectedQuestionsDetail_delete 작동 o
-        - 204체크
-        - count -1 확인(테스트 실패, 주석처리)
+    - test_SellectedQuestionsDetail_put 작동 x
+    - test_SellectedQuestionsDetail_delete 작동 x
 """
+
+
+class TestQuestionsLoginOtherUser(APITestCase):
+    def setUp(self):
+        # user
+        user = User.create_test_list(2)
+        self.user = user[0]
+        self.user_other = user[1]
+
+        # user_other가 로그인, user가 Questions생성
+        self.client.force_login(
+            self.user_other,
+        )
+        questions = Questions.create_test_list(1, self.user)
+        self.question = questions[0][0]
+
+        self.URL = "/api/v1/questions/delete/" + str(self.question.pk)
+
+    def test_QuestionDelete(self):
+        response = self.client.delete(self.URL)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
+
+
+class TestSellectedQuestionsLoginOtherUser(APITestCase):
+    DESCRIPTION = "test description"
+
+    def setUp(self):
+        # user
+        user = User.create_test_list(2)
+        self.user = user[0]
+        self.user_other = user[1]
+
+        # user_other가 로그인, user가 Questions생성
+        self.client.force_login(
+            self.user_other,
+        )
+        questions = Questions.create_test_list(1, self.user)
+        self.question = questions[0][0]
+
+        # user가 Question선택해서 개인질문 생성
+        self.sellected_question = SellectedQuestions.create_test(
+            self.user,
+            self.question.pk,
+        )
+        self.URL = (
+            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+        )
+
+    def test_SellectedQuestionsDetail_put(self):
+        response = self.client.put(
+            self.URL,
+            data={
+                "importance": 5,
+            },
+        )
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )
+
+    def test_SellectedQuestionsDetail_delete(self):
+        response = self.client.delete(
+            self.URL,
+        )
+        self.assertEqual(
+            response.status_code,
+            403,
+            "status code isn't 403.",
+        )

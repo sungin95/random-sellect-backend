@@ -1,25 +1,28 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import (
-    NotFound,
-    NotAuthenticated,
-    ParseError,
     PermissionDenied,
-)
+)  # NotFound,NotAuthenticated,ParseError,
 from rest_framework import status
 from .models import Questions, SellectedQuestions
-from .serializers import (
-    QuestionsSerializer,
-    QuestionsCreateSerializer,
-    SellectedQuestionSerializer,
-    ShowSellectedQuestionSerializer,
-    ImportanceSellectedQuestionSerializer,
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
 )
-from django.db import transaction
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from config import settings
 import random
-from .functions import page_nation
+
+from .functions.functions import page_nation, user_not_equal
+from .functions.serializers.createQ_QS import (
+    serializer_create_Question_sellectedQuestion,
+)
+from .functions.serializers.questions import serializer_get_questions
+from .functions.serializers.sellectedQuestions import (
+    serializer_get_sellectedQuestion,
+    serializer_get_sellectedQuestions,
+    serializer_create_sellectedQuestion,
+    serializer_put_sellectedQuestion_importance,
+)
 
 
 class TotalQuestions(APIView):
@@ -33,9 +36,9 @@ class QuestionsList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, page):
-        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
+        (start, end) = page_nation(settings.PAGE_SIZE, page)
         all_questions = Questions.objects.all().order_by("-count")[start:end]
-        serializer = QuestionsSerializer(all_questions, many=True)
+        serializer = serializer_get_questions(all_questions)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -43,60 +46,40 @@ class QuestionCreate(APIView):
     # 질문 만들기, 나의 질문에 추가하기
     permission_classes = [IsAuthenticated]
 
-    @transaction.atomic(using="default")
     def post(self, request):
-        try:
-            with transaction.atomic():
-                # 질문 만들기
-                questionsSerializer = QuestionsCreateSerializer(data=request.data)
-                if questionsSerializer.is_valid():
-                    question = questionsSerializer.save(authon=request.user)
-                    # 나의 질문에 추가하기
-                    questionUserSerializer = SellectedQuestionSerializer(
-                        data=request.data
-                    )
-                    if questionUserSerializer.is_valid():
-                        questionUserSerializer.save(
-                            user=request.user,
-                            question=question,
-                        )
-                        return Response(
-                            QuestionsSerializer(question).data,
-                            status=status.HTTP_201_CREATED,
-                        )
-        except:
-            pass
-        return Response({"message": "Error"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializer_create_Question_sellectedQuestion(request)
+        if serializer is not None:
+            return Response(
+                serializer["question"].data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            {"message": "Error"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 # 아직 사용 안하고 있음
 class QuestionDelete(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return Questions.objects.get(pk=pk)
-        except Questions.DoesNotExist:
-            raise NotFound
-
     def delete(self, request, questions_pk):
-        question = self.get_object(questions_pk)
-        # 작성자 검증
-        if question.authon != request.user:
+        question = Questions.get_object(questions_pk)
+        if user_not_equal(request.user, question.authon):
             raise PermissionDenied
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-#######################################################
+# ------------- SellectedQuestions ---------------
 
 
 class TotalGetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        total_sellected_questions = SellectedQuestions.objects.filter(
-            user=request.user
+        total_sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
         ).count()
         list_total_sellected_questions = [total_sellected_questions]
         return Response(list_total_sellected_questions, status.HTTP_200_OK)
@@ -107,9 +90,11 @@ class GetSellectedQuestions(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, page):
-        (start, end) = page_nation(request, settings.PAGE_SIZE, page)
-        questions = SellectedQuestions.objects.filter(user=request.user)[start:end]
-        serializer = ShowSellectedQuestionSerializer(questions, many=True)
+        (start, end) = page_nation(settings.PAGE_SIZE, page)
+        sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
+        )[start:end]
+        serializer = serializer_get_sellectedQuestions(sellected_questions)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -117,7 +102,9 @@ class SellectedQuestionStart(APIView):
     permission_classes = [IsAuthenticated]
 
     def start(self, request):
-        sellected_questions = SellectedQuestions.objects.filter(user=request.user)
+        sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
+        )
         if sellected_questions.exists():
             selection_probability = [
                 question.importance for question in sellected_questions
@@ -139,7 +126,9 @@ class SellectedQuestionStart(APIView):
 
     def get(self, request):
         sellectedquestion = self.start(request)
-        serializer = ShowSellectedQuestionSerializer(sellectedquestion)
+        serializer = serializer_get_sellectedQuestion(
+            sellectedquestion,
+        )
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -147,35 +136,24 @@ class SellectedQuestionStart(APIView):
 class SellectQuestion(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return Questions.objects.get(pk=pk)
-        except Questions.DoesNotExist:
-            raise NotFound
-
-    def post(self, request, questions_pk):
-        question = self.get_object(questions_pk)
-        questions = SellectedQuestions.objects.filter(
+    def post(self, request, question_pk):
+        question = Questions.get_object(question_pk)
+        # 이미 선택했나 확인 => 없으면(0) 생성, 있으면(!0) 406 에러
+        sellected_questions = SellectedQuestions.objects.filter(
             user=request.user,
-            description=question.description,
+            question=question.pk,
         )
-        if len(questions) == 0:
-            sellectedQuestionSerializer = SellectedQuestionSerializer(
-                data=QuestionsCreateSerializer(question).data
-            )
-            if sellectedQuestionSerializer.is_valid():
-                sellectedQuestionSerializer.save(
-                    user=request.user,
-                    question=question,
-                )
-                question.count += 1
-                question.save()
-
+        if len(sellected_questions) == 0:
+            try:
+                sellectedQuestionSerializer = serializer_create_sellectedQuestion(
+                    request,
+                    question,
+                )["serializer"]
                 return Response(
                     sellectedQuestionSerializer.data,
                     status=status.HTTP_200_OK,
                 )
-            else:
+            except:
                 return Response(
                     sellectedQuestionSerializer.errors,
                     status=status.HTTP_400_BAD_REQUEST,
@@ -191,50 +169,29 @@ class SellectQuestion(APIView):
 class SellectedQuestionsDetail(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            return SellectedQuestions.objects.get(pk=pk)
-        except SellectedQuestions.DoesNotExist:
-            raise NotFound
-
     # importance만 처리 되도록 되어있음
     def put(self, request, sq_pk):
-        sellectedQuestion = self.get_object(sq_pk)
-        # 작성자 검증
-        if sellectedQuestion.user != request.user:
+        sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+        if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
-        # testcode통과를 위해 data_dict를 따로 만들었습니다.
-        # request.data["importance"]를 직접 변경하니까 변경할수 없다는 에러 발생
-        data_dict = {}
-        if request.data["importance"]:
-            data_dict["importance"] = sellectedQuestion.importance + int(
-                request.data["importance"]
-            )
-
-        serializer = ImportanceSellectedQuestionSerializer(
-            sellectedQuestion,
-            data=data_dict,
-            partial=True,
+        serializer = serializer_put_sellectedQuestion_importance(
+            request, sellectedQuestion
         )
-        if serializer.is_valid():
-            updated_importance = serializer.save()
+        if serializer is not None:
             return Response(
-                ImportanceSellectedQuestionSerializer(updated_importance).data,
+                serializer.data,
                 status=status.HTTP_201_CREATED,
             )
-        else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
+    # delete메소드는 Response에 본문을 추가할 수 없어서 count-1이 되는지 테스트 케이스 작성 X
     def delete(self, request, sq_pk):
-        sellectedQuestion = self.get_object(sq_pk)
-        # 작성자 검증
-        if sellectedQuestion.user != request.user:
+        sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+        if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
-        q = sellectedQuestion.question
-        q.count -= 1
-        q.save()
-        sellectedQuestion.delete()
+        question_pk = sellectedQuestion.question.pk
+        sellectedQuestion.delete_count(question_pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
