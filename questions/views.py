@@ -139,10 +139,14 @@ class SellectQuestion(APIView):
     def post(self, request, question_pk):
         question = Questions.get_object(question_pk)
         # 이미 선택했나 확인 => 없으면(0) 생성, 있으면(!0) 406 에러
-        sellected_questions = SellectedQuestions.objects.filter(
-            user=request.user,
+        sellected_questions = SellectedQuestions.get_login_user_of_SQ(
+            request.user,
+        )
+        #  여기는 수정이 필요한가?
+        sellected_questions = sellected_questions.filter(
             question=question.pk,
         )
+
         if len(sellected_questions) == 0:
             try:
                 sellectedQuestionSerializer = serializer_create_sellectedQuestion(

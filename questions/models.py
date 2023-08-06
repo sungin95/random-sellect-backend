@@ -81,9 +81,7 @@ class SellectedQuestions(Question):
             raise ParseError
 
     def get_login_user_of_SQ(request_user: User):
-        login_user_SQ = SellectedQuestions.objects.filter(
-            user=request_user,
-        )
+        login_user_SQ = request_user.sellectedquestions_set.all()
         return login_user_SQ
 
     # testcase
