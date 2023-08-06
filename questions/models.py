@@ -21,6 +21,7 @@ class Questions(Question):
     )
     count = models.PositiveIntegerField(default=0)
 
+    # 모델 관리
     def get_object(pk: int):
         try:
             return Questions.objects.get(pk=pk)
@@ -31,6 +32,7 @@ class Questions(Question):
         self.count += n
         self.save()
 
+    # testcase
     def create_test_list(n: int, user: User) -> list:
         questions_list = []
         for i in range(n):
@@ -61,12 +63,24 @@ class SellectedQuestions(Question):
         related_name="questions_set",
     )
 
+    # 모델 관리
     def get_object(pk: int) -> object:
         try:
             return SellectedQuestions.objects.get(pk=pk)
         except SellectedQuestions.DoesNotExist:
             raise NotFound
 
+    @transaction.atomic(using="default")
+    def delete_count(self, question_pk: int):
+        try:
+            with transaction.atomic():
+                question = Questions.get_object(question_pk)
+                question.count_n(-1)
+                self.delete()
+        except:
+            raise ParseError
+
+    # testcase
     @transaction.atomic(using="default")
     def create_test(user: User, question_pk: Questions):
         try:
@@ -80,15 +94,5 @@ class SellectedQuestions(Question):
                     question=question,
                 )
                 return sellected_question
-        except:
-            raise ParseError
-
-    @transaction.atomic(using="default")
-    def delete_count(self, question_pk: int):
-        try:
-            with transaction.atomic():
-                question = Questions.get_object(question_pk)
-                question.count_n(-1)
-                self.delete()
         except:
             raise ParseError

@@ -8,7 +8,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    def get_object(pk):
+    def get_object(pk: int):
         try:
             return User.objects.get(pk=pk)
         except User.DoesNotExist:
