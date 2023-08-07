@@ -141,13 +141,11 @@ class SellectQuestion(APIView):
         # 이미 선택했나 확인 => 없으면(0) 생성, 있으면(!0) 406 에러
         sellected_questions = SellectedQuestions.get_login_user_of_SQ(
             request.user,
-        )
-        #  여기는 수정이 필요한가?
-        sellected_questions = sellected_questions.filter(
+        ).filter(
             question=question.pk,
         )
 
-        if len(sellected_questions) == 0:
+        if sellected_questions.exists() == False:
             try:
                 sellectedQuestionSerializer = serializer_create_sellectedQuestion(
                     request,
