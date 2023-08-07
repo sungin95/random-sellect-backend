@@ -145,7 +145,7 @@ class SellectQuestion(APIView):
             question=question.pk,
         )
 
-        if sellected_questions.exists() == False:
+        if not sellected_questions.exists():
             try:
                 sellectedQuestionSerializer = serializer_create_sellectedQuestion(
                     request,
