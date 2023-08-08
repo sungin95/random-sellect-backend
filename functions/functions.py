@@ -18,3 +18,10 @@ def user_not_equal(request_user: User, user: User) -> bool:
         return True
     else:
         return False
+
+
+def errors_check(serializer: dict) -> bool:
+    if serializer.get("errors") is None:
+        return True
+    else:
+        return False

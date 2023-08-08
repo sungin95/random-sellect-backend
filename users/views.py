@@ -16,6 +16,7 @@ from functions.serializers.users import (
     serializer_put_user,
     serializer_create_user,
 )
+from functions.functions import errors_check
 
 
 class Me(APIView):
@@ -49,7 +50,7 @@ class UserCreate(APIView):
         if not password:
             raise ParseError
         serializer = serializer_create_user(request.data, password)
-        if serializer.get("errors") is None:
+        if errors_check(serializer):
             login(request, serializer["model"])
             return Response(
                 serializer["data"],

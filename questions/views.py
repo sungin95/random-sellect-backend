@@ -13,7 +13,7 @@ from rest_framework.permissions import (
 from config import settings
 import random
 
-from functions.functions import page_nation, user_not_equal
+from functions.functions import page_nation, user_not_equal, errors_check
 from functions.serializers.createQ_QS import (
     serializer_create_Question_sellectedQuestion,
 )
@@ -49,7 +49,7 @@ class QuestionCreate(APIView):
 
     def post(self, request):
         serializer = serializer_create_Question_sellectedQuestion(request)
-        if serializer.get("errors") is None:
+        if errors_check(serializer):
             return Response(
                 serializer["question"],
                 status=status.HTTP_201_CREATED,
@@ -151,7 +151,7 @@ class SellectQuestion(APIView):
                 request,
                 question,
             )
-            if sellectedQuestionSerializer.get("errors") is None:
+            if errors_check(sellectedQuestionSerializer):
                 return Response(
                     sellectedQuestionSerializer["data"],
                     status=status.HTTP_200_OK,
@@ -183,7 +183,7 @@ class SellectedQuestionsDetail(APIView):
             request.data["importance"], sellectedQuestion
         )
 
-        if serializer.get("errors") is None:
+        if errors_check(serializer):
             return Response(
                 serializer["data"],
                 status=status.HTTP_201_CREATED,
