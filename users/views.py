@@ -11,24 +11,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ParseError, NotFound
 from .models import User
 from .serializers import UserSerializer
+from functions.serializers.users import (
+    serializer_get_user,
+    serializer_put_user,
+    serializer_create_user,
+)
 
 
 class Me(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = serializer_get_user(request.user)
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = UserSerializer(
-            request.user,
-            data=request.data,
-            partial=True,
-        )
-        if serializer.is_valid():
-            user = serializer.save()
-            serializer = UserSerializer(user)
+        serializer = serializer_put_user(request)
+        if serializer is not None:
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
@@ -39,18 +38,12 @@ class UserCreate(APIView):
         password = request.data.get("password")
         if not password:
             raise ParseError
-        serializer = UserSerializer(
-            data=request.data,
-        )
-        if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(password)
-            user.save()
-            serializer = UserSerializer(user)
-            login(request, user)
-            return Response(serializer.data)
+        user = serializer_create_user(request.data, password)
+        if user is not None:
+            login(request, user["model"])
+            return Response(user["serializer"].data)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogIn(APIView):
