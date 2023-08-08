@@ -1,10 +1,11 @@
 from rest_framework.test import APITestCase
 
 from users.models import User
+from config.urls import base_url
 
 
 class TestUserSignup(APITestCase):
-    URL = "/api/v1/users/signup"
+    URL = f"/{base_url}users/signup"
 
     def test_user_signup_1(self):
         response = self.client.post(
@@ -37,7 +38,7 @@ class TestUserSignup(APITestCase):
 
 
 class TestUserLogin(APITestCase):
-    URL = "/api/v1/users/login"
+    URL = f"/{base_url}users/login"
 
     def setUp(self):
         user = User.create_test_list(1)[0]
@@ -145,7 +146,7 @@ class TestUserLogin(APITestCase):
 
 
 class TestUserLogout(APITestCase):
-    URL = "/api/v1/users/logout"
+    URL = f"/{base_url}users/logout"
 
     def setUp(self):
         user = User.create_test_list(1)[0]
@@ -166,7 +167,7 @@ class TestUserLogout(APITestCase):
 
 
 class TestUserInformation(APITestCase):
-    URL = "/api/v1/users/me"
+    URL = f"/{base_url}users/me"
 
     def setUp(self):
         user = User.create_test_list(1)[0]
