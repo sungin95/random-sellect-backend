@@ -20,44 +20,37 @@ def serializer_get_sellectedQuestions(questions):
 
 
 # create
-@transaction.atomic(using="default")
 def serializer_create_sellectedQuestion(request, question: Questions):
-    try:
-        with transaction.atomic():
-            sellectedQuestionSerializer = SellectedQuestionSerializer(
-                data=QuestionsCreateSerializer(question).data,
-            )
-            if sellectedQuestionSerializer.is_valid():
-                sellectedQuestion = sellectedQuestionSerializer.save(
-                    user=request.user,
-                    question=question,
-                )
-                # SQ 생성시 마다 해당 question 카운트 1을 올려준다.
-                question.count_n(1)
-                return {
-                    "serializer": sellectedQuestionSerializer,
-                    "model": sellectedQuestion,
-                }
-    except:
-        pass
-    raise ParseError
+    sellectedQuestionSerializer = SellectedQuestionSerializer(
+        data=QuestionsCreateSerializer(question).data,
+    )
+    if sellectedQuestionSerializer.is_valid():
+        sellectedQuestion = sellectedQuestionSerializer.save(
+            user=request.user,
+            question=question,
+        )
+        # SQ 생성시 마다 해당 question 카운트 1을 올려준다.
+        question.count_n(1)
+        return {
+            "data": sellectedQuestionSerializer.data,
+            "model": sellectedQuestion,
+        }
+    return {"errors": sellectedQuestionSerializer}
 
 
 # put
 def serializer_put_sellectedQuestion_importance(
-    request, sellectedQuestion: SellectedQuestions
+    importance, sellectedQuestion: SellectedQuestions
 ):
-    if request.data["importance"]:
-        sellectedQuestion_importance_dict = {
-            "importance": sellectedQuestion.importance
-            + int(request.data["importance"]),
-        }
-        serializer = ImportanceSellectedQuestionSerializer(
-            sellectedQuestion,
-            data=sellectedQuestion_importance_dict,
-            partial=True,
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return serializer
-    return None
+    sellectedQuestion_importance_dict = {
+        "importance": sellectedQuestion.importance + int(importance),
+    }
+    serializer = ImportanceSellectedQuestionSerializer(
+        sellectedQuestion,
+        data=sellectedQuestion_importance_dict,
+        partial=True,
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return {"data": serializer.data}
+    return {"errors": serializer.errors}

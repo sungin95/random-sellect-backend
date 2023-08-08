@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import (
     PermissionDenied,
+    ParseError,
 )  # NotFound,NotAuthenticated,ParseError,
 from rest_framework import status
 from .models import Questions, SellectedQuestions
@@ -48,13 +49,13 @@ class QuestionCreate(APIView):
 
     def post(self, request):
         serializer = serializer_create_Question_sellectedQuestion(request)
-        if serializer is not None:
+        if serializer.get("errors") is None:
             return Response(
-                serializer["question"].data,
+                serializer["question"],
                 status=status.HTTP_201_CREATED,
             )
         return Response(
-            {"message": "Error"},
+            serializer["errors"],
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -117,7 +118,7 @@ class SellectedQuestionStart(APIView):
             return selected_question
 
         else:
-            # 오류를 대비해 값을 넣어 두었음.
+            # 오류를 대비해 값을 넣어 두었음.(프론트 구현이 미흡해서 이상하지만 이렇게 넣었습니다. )
             return {
                 "pk": 0,
                 "description": "질문지가 없습니다.",
@@ -146,20 +147,20 @@ class SellectQuestion(APIView):
         )
 
         if not sellected_questions.exists():
-            try:
-                sellectedQuestionSerializer = serializer_create_sellectedQuestion(
-                    request,
-                    question,
-                )["serializer"]
+            sellectedQuestionSerializer = serializer_create_sellectedQuestion(
+                request,
+                question,
+            )
+            if sellectedQuestionSerializer.get("errors") is None:
                 return Response(
-                    sellectedQuestionSerializer.data,
+                    sellectedQuestionSerializer["data"],
                     status=status.HTTP_200_OK,
                 )
-            except:
-                return Response(
-                    sellectedQuestionSerializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+            return Response(
+                sellectedQuestionSerializer["errors"],
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         else:
             return Response(
                 {"already exists"},
@@ -176,16 +177,19 @@ class SellectedQuestionsDetail(APIView):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
         if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
+        if not request.data["importance"]:
+            raise ParseError
         serializer = serializer_put_sellectedQuestion_importance(
-            request, sellectedQuestion
+            request.data["importance"], sellectedQuestion
         )
-        if serializer is not None:
+
+        if serializer.get("errors") is None:
             return Response(
-                serializer.data,
+                serializer["data"],
                 status=status.HTTP_201_CREATED,
             )
         return Response(
-            serializer.errors,
+            serializer["errors"],
             status=status.HTTP_400_BAD_REQUEST,
         )
 
