@@ -23,20 +23,24 @@ class Me(APIView):
 
     def get(self, request):
         serializer = serializer_get_user(request.user)
-        return Response(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
-    def put(self, request):
-        serializer = serializer_put_user(request)
-        if serializer.get("errors") is None:
-            return Response(
-                serializer["data"],
-                status=status.HTTP_201_CREATED,
-            )
-        else:
-            return Response(
-                serializer["errors"],
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    # 현재 안쓰고 있어서 주석처리
+    # def put(self, request):
+    #     serializer = serializer_put_user(request)
+    #     if serializer.get("errors") is None:
+    #         return Response(
+    #             serializer["data"],
+    #             status=status.HTTP_201_CREATED,
+    #         )
+    #     else:
+    #         return Response(
+    #             serializer["errors"],
+    #             status=status.HTTP_400_BAD_REQUEST,
+    #         )
 
 
 class UserCreate(APIView):
@@ -44,12 +48,18 @@ class UserCreate(APIView):
         password = request.data.get("password")
         if not password:
             raise ParseError
-        user = serializer_create_user(request.data, password)
-        if user is not None:
-            login(request, user["model"])
-            return Response(user["serializer"].data)
+        serializer = serializer_create_user(request.data, password)
+        if serializer.get("errors") is None:
+            login(request, serializer["model"])
+            return Response(
+                serializer["data"],
+                status=status.HTTP_201_CREATED,
+            )
         else:
-            return Response({"errors"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class LogIn(APIView):
@@ -67,12 +77,12 @@ class LogIn(APIView):
             # login시키고 백엔드에 세션 생성, 사용자에게 cookie제공
             login(request, user)
             return Response(
-                {"ok": "Welcome!"},
+                {"ok": f"{user.username}님 환영합니다. "},
                 status=status.HTTP_200_OK,
             )
         else:
             return Response(
-                {"error": "wrong password"},
+                {"errors": "아이디 혹은 비밀번호가 잘못되었습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
