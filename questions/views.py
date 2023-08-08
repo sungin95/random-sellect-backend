@@ -13,7 +13,8 @@ from rest_framework.permissions import (
 from config import settings
 import random
 
-from functions.functions import page_nation, user_not_equal, errors_check
+from functions.functions import page_nation, user_not_equal
+from functions.errors import errors_check
 from functions.serializers.createQ_QS import (
     serializer_create_Question_sellectedQuestion,
 )
@@ -175,10 +176,13 @@ class SellectedQuestionsDetail(APIView):
     # importance만 처리 되도록 되어있음
     def put(self, request, sq_pk):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+
         if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
+
         if not request.data["importance"]:
             raise ParseError
+
         serializer = serializer_put_sellectedQuestion_importance(
             request.data["importance"], sellectedQuestion
         )
@@ -196,8 +200,10 @@ class SellectedQuestionsDetail(APIView):
     # delete메소드는 Response에 본문을 추가할 수 없어서 count-1이 되는지 테스트 케이스 작성 X
     def delete(self, request, sq_pk):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+
         if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
+
         question_pk = sellectedQuestion.question.pk
         sellectedQuestion.delete_count(question_pk)
         return Response(status=status.HTTP_204_NO_CONTENT)

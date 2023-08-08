@@ -16,7 +16,7 @@ from functions.serializers.users import (
     serializer_put_user,
     serializer_create_user,
 )
-from functions.functions import errors_check
+from functions.errors import errors_check
 
 
 class Me(APIView):
