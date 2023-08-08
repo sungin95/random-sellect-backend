@@ -12,12 +12,12 @@ from rest_framework.permissions import (
 from config import settings
 import random
 
-from .functions.functions import page_nation, user_not_equal
-from .functions.serializers.createQ_QS import (
+from functions.functions import page_nation, user_not_equal
+from functions.serializers.createQ_QS import (
     serializer_create_Question_sellectedQuestion,
 )
-from .functions.serializers.questions import serializer_get_questions
-from .functions.serializers.sellectedQuestions import (
+from functions.serializers.questions import serializer_get_questions
+from functions.serializers.sellectedQuestions import (
     serializer_get_sellectedQuestion,
     serializer_get_sellectedQuestions,
     serializer_create_sellectedQuestion,

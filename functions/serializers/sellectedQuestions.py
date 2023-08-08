@@ -1,4 +1,4 @@
-from questions.functions.serializers.serializers import (
+from questions.serializers import (
     QuestionsSerializer,
     QuestionsCreateSerializer,
     SellectedQuestionSerializer,
