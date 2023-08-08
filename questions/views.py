@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import (
     PermissionDenied,
+    ParseError,
 )  # NotFound,NotAuthenticated,ParseError,
 from rest_framework import status
 from .models import Questions, SellectedQuestions
@@ -12,12 +13,13 @@ from rest_framework.permissions import (
 from config import settings
 import random
 
-from .functions.functions import page_nation, user_not_equal
-from .functions.serializers.createQ_QS import (
+from functions.functions import page_nation, user_not_equal
+from functions.errors import errors_check
+from functions.serializers.createQ_QS import (
     serializer_create_Question_sellectedQuestion,
 )
-from .functions.serializers.questions import serializer_get_questions
-from .functions.serializers.sellectedQuestions import (
+from functions.serializers.questions import serializer_get_questions
+from functions.serializers.sellectedQuestions import (
     serializer_get_sellectedQuestion,
     serializer_get_sellectedQuestions,
     serializer_create_sellectedQuestion,
@@ -48,13 +50,13 @@ class QuestionCreate(APIView):
 
     def post(self, request):
         serializer = serializer_create_Question_sellectedQuestion(request)
-        if serializer is not None:
+        if errors_check(serializer):
             return Response(
-                serializer["question"].data,
+                serializer["question"],
                 status=status.HTTP_201_CREATED,
             )
         return Response(
-            {"message": "Error"},
+            serializer["errors"],
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -117,7 +119,7 @@ class SellectedQuestionStart(APIView):
             return selected_question
 
         else:
-            # 오류를 대비해 값을 넣어 두었음.
+            # 오류를 대비해 값을 넣어 두었음.(프론트 구현이 미흡해서 이상하지만 이렇게 넣었습니다. )
             return {
                 "pk": 0,
                 "description": "질문지가 없습니다.",
@@ -146,20 +148,20 @@ class SellectQuestion(APIView):
         )
 
         if not sellected_questions.exists():
-            try:
-                sellectedQuestionSerializer = serializer_create_sellectedQuestion(
-                    request,
-                    question,
-                )["serializer"]
+            sellectedQuestionSerializer = serializer_create_sellectedQuestion(
+                request,
+                question,
+            )
+            if errors_check(sellectedQuestionSerializer):
                 return Response(
-                    sellectedQuestionSerializer.data,
+                    sellectedQuestionSerializer["data"],
                     status=status.HTTP_200_OK,
                 )
-            except:
-                return Response(
-                    sellectedQuestionSerializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+            return Response(
+                sellectedQuestionSerializer["errors"],
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         else:
             return Response(
                 {"already exists"},
@@ -174,26 +176,34 @@ class SellectedQuestionsDetail(APIView):
     # importance만 처리 되도록 되어있음
     def put(self, request, sq_pk):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+
         if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
+
+        if not request.data["importance"]:
+            raise ParseError
+
         serializer = serializer_put_sellectedQuestion_importance(
-            request, sellectedQuestion
+            request.data["importance"], sellectedQuestion
         )
-        if serializer is not None:
+
+        if errors_check(serializer):
             return Response(
-                serializer.data,
+                serializer["data"],
                 status=status.HTTP_201_CREATED,
             )
         return Response(
-            serializer.errors,
+            serializer["errors"],
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     # delete메소드는 Response에 본문을 추가할 수 없어서 count-1이 되는지 테스트 케이스 작성 X
     def delete(self, request, sq_pk):
         sellectedQuestion = SellectedQuestions.get_object(sq_pk)
+
         if user_not_equal(request.user, sellectedQuestion.user):
             raise PermissionDenied
+
         question_pk = sellectedQuestion.question.pk
         sellectedQuestion.delete_count(question_pk)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,4 +1,4 @@
-from questions.functions.serializers.serializers import (
+from questions.serializers import (
     QuestionsSerializer,
     QuestionsCreateSerializer,
     SellectedQuestionSerializer,
@@ -17,7 +17,7 @@ def serializer_create_questions(request):
     if questionSerializer.is_valid():
         question = questionSerializer.save(authon=request.user)
         return {
-            "serializer": questionSerializer,
+            "data": questionSerializer.data,
             "model": question,
         }
-    raise ParseError
+    return {"errors": questionSerializer}

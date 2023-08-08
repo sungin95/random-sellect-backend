@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
-from ...models import Questions
+from .models import Questions
 from users.serializers import UserCheckSerializer
-from ...models import SellectedQuestions
+from .models import SellectedQuestions
 
 
 class QuestionsSerializer(ModelSerializer):

@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 from users.models import User
 from questions.models import Questions, SellectedQuestions
+from config.urls import base_url
 
 """
 1. 로그인 안한 상황
@@ -72,7 +73,7 @@ from questions.models import Questions, SellectedQuestions
 
 # 로그인 안한상황에서 생성
 class TestQuestionsLogout(APITestCase):
-    URL = "/api/v1/questions/"
+    URL = f"/{base_url}questions/"
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -108,7 +109,7 @@ class TestQuestionsLogout(APITestCase):
 
 
 class TestSellectedQuestionsLogout(APITestCase):
-    URL = "/api/v1/questions/sellected/"
+    URL = f"/{base_url}questions/sellected/"
 
     def test_GetSellectedQuestions(self):
         response = self.client.get(self.URL + "page/1")
@@ -190,8 +191,7 @@ class TestSellectedQuestionsLogout(APITestCase):
 
 # 로그인 한상황에서 생성
 class TestQuestionsLogin(APITestCase):
-    URL = "/api/v1/questions/"
-    DESCRIPTION = "test description"
+    URL = f"/{base_url}questions/"
 
     def setUp(self):
         user_list = User.create_test_list(1)
@@ -201,6 +201,7 @@ class TestQuestionsLogin(APITestCase):
         )
         questions_list = Questions.create_test_list(1, self.user)
         self.question = questions_list[0][0]
+        self.DESCRIPTION = self.question.description
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -258,7 +259,7 @@ class TestQuestionsLogin(APITestCase):
 
 
 class TestSellectedQuestionsLogin(APITestCase):
-    URL = "/api/v1/questions/sellected/"
+    URL = f"/{base_url}questions/sellected/"
 
     def setUp(self):
         # user 1명 생성 및 로그인
@@ -365,7 +366,7 @@ class TestSellectedQuestionsLoginDetail(APITestCase):
             self.question.pk,
         )
         self.URL = (
-            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+            f"/{base_url}questions/sellected/{str(self.sellected_question.pk)}/detail"
         )
 
     def test_SellectedQuestionsDetail_put_1(self):
@@ -433,7 +434,7 @@ class TestQuestionsLoginOtherUser(APITestCase):
         questions = Questions.create_test_list(1, self.user)
         self.question = questions[0][0]
 
-        self.URL = "/api/v1/questions/delete/" + str(self.question.pk)
+        self.URL = f"/{base_url}questions/delete/" + str(self.question.pk)
 
     def test_QuestionDelete(self):
         response = self.client.delete(self.URL)
@@ -445,8 +446,6 @@ class TestQuestionsLoginOtherUser(APITestCase):
 
 
 class TestSellectedQuestionsLoginOtherUser(APITestCase):
-    DESCRIPTION = "test description"
-
     def setUp(self):
         # user
         user = User.create_test_list(2)
@@ -466,7 +465,7 @@ class TestSellectedQuestionsLoginOtherUser(APITestCase):
             self.question.pk,
         )
         self.URL = (
-            "/api/v1/questions/sellected/" + str(self.sellected_question.pk) + "/detail"
+            f"/{base_url}questions/sellected/{str(self.sellected_question.pk)}/detail"
         )
 
     def test_SellectedQuestionsDetail_put(self):
