@@ -27,10 +27,16 @@ class Me(APIView):
 
     def put(self, request):
         serializer = serializer_put_user(request)
-        if serializer is not None:
-            return Response(serializer.data)
+        if serializer.get("errors") is None:
+            return Response(
+                serializer["data"],
+                status=status.HTTP_201_CREATED,
+            )
         else:
-            return Response(serializer.errors)
+            return Response(
+                serializer["errors"],
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class UserCreate(APIView):
@@ -60,7 +66,10 @@ class LogIn(APIView):
         if user:
             # login시키고 백엔드에 세션 생성, 사용자에게 cookie제공
             login(request, user)
-            return Response({"ok": "Welcome!"})
+            return Response(
+                {"ok": "Welcome!"},
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(
                 {"error": "wrong password"},
@@ -73,7 +82,10 @@ class LogOut(APIView):
 
     def post(self, request):
         logout(request)
-        return Response({"ok": "bye!"})
+        return Response(
+            {"ok": "bye!"},
+            status=status.HTTP_200_OK,
+        )
 
 
 # 화면이 준비 안되서 안쓰는 중

@@ -21,10 +21,12 @@ def serializer_create_user(data, password):
         user.set_password(password)
         user.save()
         return {
-            "serializer": serializer,
+            "data": serializer.data,
             "model": user,
         }
-    return None
+    return {
+        "errors": serializer.errors,
+    }
 
 
 def serializer_put_user(request):
@@ -35,5 +37,5 @@ def serializer_put_user(request):
     )
     if serializer.is_valid():
         serializer.save()
-        return serializer
-    return None
+        return {"data": serializer.data}
+    return {"errors": serializer}
