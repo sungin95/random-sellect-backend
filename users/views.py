@@ -17,14 +17,12 @@ class Me(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
     def put(self, request):
-        user = request.user
         serializer = UserSerializer(
-            user,
+            request.user,
             data=request.data,
             partial=True,
         )
@@ -85,18 +83,19 @@ class LogOut(APIView):
         return Response({"ok": "bye!"})
 
 
-class ChangePassword(APIView):
-    permission_classes = [IsAuthenticated]
+# 화면이 준비 안되서 안쓰는 중
+# class ChangePassword(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def put(self, request):
-        user = request.user
-        old_password = request.data.get("old_password")
-        new_password = request.data.get("new_password")
-        if not old_password or not new_password:
-            raise ParseError
-        if user.check_password(old_password):
-            user.set_password(new_password)
-            user.save()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            raise ParseError
+#     def put(self, request):
+#         user = request.user
+#         old_password = request.data.get("old_password")
+#         new_password = request.data.get("new_password")
+#         if not old_password or not new_password:
+#             raise ParseError
+#         if user.check_password(old_password):
+#             user.set_password(new_password)
+#             user.save()
+#             return Response(status=status.HTTP_200_OK)
+#         else:
+#             raise ParseError
