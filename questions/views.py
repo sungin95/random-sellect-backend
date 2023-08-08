@@ -167,7 +167,7 @@ class SellectQuestion(APIView):
             )
 
 
-# 수정(put, importance), 삭제(delete)
+# 수정(importance), 삭제
 class SellectedQuestionsDetail(APIView):
     permission_classes = [IsAuthenticated]
 
