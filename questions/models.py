@@ -82,6 +82,7 @@ class SellectedQuestions(Question):
     def importance_calc(self, num: int):
         if 0 <= (self.importance + num):
             self.importance += num
+            self.save()
             return self.importance
         else:
             raise
