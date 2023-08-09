@@ -106,7 +106,8 @@ class SellectedQuestionStart(APIView):
         sellected_questions = SellectedQuestions.get_login_user_of_SQ(
             request.user,
         )
-        if sellected_questions.exists():
+        # sellected_questions가 뒤에서 사용되므로 캐싱을 위해 .exists() 일부로 제거.
+        if sellected_questions:
             selection_probability = [
                 question.importance for question in sellected_questions
             ]
