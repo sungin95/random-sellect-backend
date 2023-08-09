@@ -203,12 +203,21 @@ class TestQuestionsLogin(APITestCase):
         self.question = questions_list[0][0]
         self.DESCRIPTION = self.question.description + "test"
 
-    def test_QuestionsList(self):
+    def test_QuestionsList_1(self):
         response = self.client.get(self.URL + "1")
         self.assertEqual(
             response.status_code,
             200,
             "status code isn't 200.",
+        )
+
+    def test_QuestionsList_2(self):
+        response = self.client.get(self.URL + "1")
+        data = response.json()
+        self.assertEqual(
+            len(data),
+            1,
+            "questions의 갯수가 잘못되었습니다.",
         )
 
     def test_TotalQuestions_1(self):
