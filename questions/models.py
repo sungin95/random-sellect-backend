@@ -33,20 +33,25 @@ class Questions(Question):
         self.save()
 
     # testcase
+    @transaction.atomic(using="default")
     def create_test_list(n: int, user: User) -> list:
-        questions_list = []
-        for i in range(n):
-            question = Questions.objects.create(
-                description="test description " + str(i),
-                authon=user,
-            )
-            # 질문 만들면 나의 질문에도 자동 추가
-            sellected_question = SellectedQuestions.create_test(
-                user,
-                question.pk,
-            )
-            questions_list.append((question, sellected_question))
-        return questions_list
+        try:
+            with transaction.atomic():
+                questions_list = []
+                for i in range(n):
+                    question = Questions.objects.create(
+                        description="test description " + str(i),
+                        authon=user,
+                    )
+                    # 질문 만들면 나의 질문에도 자동 추가
+                    sellected_question = SellectedQuestions.create_test(
+                        user,
+                        question.pk,
+                    )
+                    questions_list.append((question, sellected_question))
+                return questions_list
+        except:
+            raise ParseError
 
 
 # 개인 질문 모음
@@ -60,29 +65,31 @@ class SellectedQuestions(Question):
         "Questions",
         on_delete=models.SET_NULL,
         null=True,
-        related_name="questions_set",
+        related_name="sellectedQuestions_set",
     )
 
     # 모델 관리
-    def get_object(pk: int) -> object:
+    def get_object(pk: int):
         try:
             return SellectedQuestions.objects.get(pk=pk)
         except SellectedQuestions.DoesNotExist:
             raise NotFound
 
-    @transaction.atomic(using="default")
-    def delete_count(self, question_pk: int):
-        try:
-            with transaction.atomic():
-                question = Questions.get_object(question_pk)
-                question.count_n(-1)
-                self.delete()
-        except:
-            raise ParseError
-
     def get_login_user_of_SQ(request_user: User):
         login_user_SQ = request_user.sellectedquestions_set.all()
         return login_user_SQ
+
+    def importance_calc(self, num: int):
+        if 0 <= (self.importance + num):
+            self.importance += num
+            return self.importance
+        else:
+            raise
+
+    def delete_count(self, question_pk: int):
+        question = Questions.get_object(question_pk)
+        question.count_n(-1)
+        self.delete()
 
     # testcase
     @transaction.atomic(using="default")

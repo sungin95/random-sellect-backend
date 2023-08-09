@@ -22,7 +22,10 @@ class QuestionsSerializer(ModelSerializer):
 class QuestionsCreateSerializer(ModelSerializer):
     class Meta:
         model = Questions
-        fields = ("description",)
+        fields = (
+            "pk",
+            "description",
+        )
 
 
 #############################
@@ -31,7 +34,10 @@ class QuestionsCreateSerializer(ModelSerializer):
 class SellectedQuestionSerializer(ModelSerializer):
     class Meta:
         model = SellectedQuestions
-        fields = ("description",)
+        fields = (
+            "pk",
+            "description",
+        )
 
 
 class ShowSellectedQuestionSerializer(ModelSerializer):

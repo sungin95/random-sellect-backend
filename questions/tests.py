@@ -201,7 +201,7 @@ class TestQuestionsLogin(APITestCase):
         )
         questions_list = Questions.create_test_list(1, self.user)
         self.question = questions_list[0][0]
-        self.DESCRIPTION = self.question.description
+        self.DESCRIPTION = self.question.description + "test"
 
     def test_QuestionsList(self):
         response = self.client.get(self.URL + "1")
@@ -225,10 +225,32 @@ class TestQuestionsLogin(APITestCase):
         self.assertEqual(
             type(data[0]),
             int,
-            "status code isn't 200.",
+            "TotalQuestions의 값이 int가 아닙니다.",
         )
 
-    def test_QuestionCreate(self):
+    def test_TotalQuestions_3(self):
+        response = self.client.get(self.URL + "total")
+        data = response.json()
+        self.assertEqual(
+            data[0],
+            1,
+            "TotalQuestions의 값이 int가 아닙니다.",
+        )
+
+    def test_QuestionCreate_1(self):
+        response = self.client.post(
+            self.URL + "create",
+            data={
+                "description": self.DESCRIPTION,
+            },
+        )
+        self.assertEqual(
+            response.status_code,
+            201,
+            "status code isn't 201.",
+        )
+
+    def test_QuestionCreate_2(self):
         response = self.client.post(
             self.URL + "create",
             data={
@@ -241,13 +263,55 @@ class TestQuestionsLogin(APITestCase):
             self.DESCRIPTION,
             "description이 제대로 전달이 안되었습니다. ",
         )
+
+    def test_QuestionCreate_3(self):
+        response = self.client.post(
+            self.URL + "create",
+            data={
+                "description": self.DESCRIPTION,
+            },
+        )
+        data = response.json()
+        question = Questions.get_object(int(data["pk"]))
         self.assertEqual(
-            response.status_code,
-            201,
-            "status code isn't 201.",
+            question.count,
+            1,
+            "Questions 생성시 count 값이 잘못되었습니다. ",
         )
 
-    def test_QuestionDelete(self):
+    def test_QuestionCreate_4(self):
+        response = self.client.post(
+            self.URL + "create",
+            data={
+                "description": self.DESCRIPTION + "123",
+            },
+        )
+        data = response.json()
+        question = Questions.get_object(int(data["pk"]))
+        sellectedQuestions = question.sellectedQuestions_set.all()[0]
+        self.assertEqual(
+            self.DESCRIPTION + "123",
+            sellectedQuestions.description,
+            "Questions 생성시 count 값이 잘못되었습니다. ",
+        )
+
+    def test_QuestionCreate_5(self):
+        response = self.client.post(
+            self.URL + "create",
+            data={
+                "description": self.DESCRIPTION + "123",
+            },
+        )
+        data = response.json()
+        question = Questions.get_object(int(data["pk"]))
+        len_sellectedQuestions = len(question.sellectedQuestions_set.all())
+        self.assertEqual(
+            len_sellectedQuestions,
+            1,
+            "Questions 생성시 count 값이 잘못되었습니다. ",
+        )
+
+    def test_QuestionDelete_1(self):
         response = self.client.delete(
             self.URL + "delete/" + str(self.question.pk),
         )
@@ -257,28 +321,69 @@ class TestQuestionsLogin(APITestCase):
             "status code isn't 204.",
         )
 
+    def test_QuestionDelete_2(self):
+        question = Questions.get_object(self.question.pk)
+        self.client.delete(
+            self.URL + "delete/" + str(self.question.pk),
+        )
+        try:
+            Questions.get_object(self.question.pk)
+            self.assertEqual(
+                False,
+                True,
+                "Questions가 삭제가 안된 상황",
+            )
+        except:
+            self.assertEqual(
+                True,
+                True,
+                "Questions가 정상 삭제",
+            )
+
+    def test_QuestionDelete_3(self):
+        question = Questions.get_object(self.question.pk)
+        sellectedQuestion = question.sellectedQuestions_set.all()[0]
+        self.client.delete(
+            self.URL + "delete/" + str(self.question.pk),
+        )
+        SellectedQuestions.get_object(sellectedQuestion.pk)
+        self.assertEqual(
+            True,
+            True,
+            "Questions 삭제시 관련 SellectedQuestions도 삭제되었습니다. ",
+        )
+
 
 class TestSellectedQuestionsLogin(APITestCase):
     URL = f"/{base_url}questions/sellected/"
 
     def setUp(self):
-        # user 1명 생성 및 로그인
+        # user 2명 생성 및 로그인(user 로그인, user_owner)
         user_list = User.create_test_list(2)
         self.user_owner = user_list[0]
         self.user = user_list[1]
         self.client.force_login(
             self.user,
         )
-        # Questions 1개 생성 및 선택
+        # Questions 1개 생성(user_owner 소유)
         questions_list = Questions.create_test_list(1, self.user_owner)
         self.question = questions_list[0][0]
 
-    def test_GetSellectedQuestions(self):
+    def test_GetSellectedQuestions_1(self):
         response = self.client.get(self.URL + "page/1")
         self.assertEqual(
             response.status_code,
             200,
             "status code isn't 200.",
+        )
+
+    def test_GetSellectedQuestions_2(self):
+        response = self.client.get(self.URL + "page/1")
+        data = response.json()
+        self.assertEqual(
+            len(data),
+            0,
+            "SellectedQuestions의 user에 문제가 있습니다.",
         )
 
     def test_TotalGetSellectedQuestions_1(self):
@@ -351,14 +456,16 @@ class TestSellectedQuestionsLogin(APITestCase):
 
 class TestSellectedQuestionsLoginDetail(APITestCase):
     def setUp(self):
-        # user 2명 생성 및 로그인
+        # user 2명 생성 및 로그인(user 로그인, user_owner)
         user_list = User.create_test_list(2)
         self.user_owner = user_list[0]
         self.user = user_list[1]
         self.client.force_login(
             self.user,
         )
-        # Questions 1개 생성 및 선택
+        #             Questions         SellectedQuestions      login
+        # user         x                 o                       o
+        # user_owner   o                 o                       x
         questions_list = Questions.create_test_list(1, self.user_owner)
         self.question = questions_list[0][0]
         self.sellected_question = SellectedQuestions.create_test(
@@ -398,6 +505,28 @@ class TestSellectedQuestionsLoginDetail(APITestCase):
             "importance값이 틀렸습니다.",
         )
 
+    def test_SellectedQuestionsDetail_put_3(self):
+        num = -99999
+        try:
+            response = self.client.put(
+                self.URL,
+                data={
+                    "importance": num,
+                },
+            )
+            self.assertEqual(
+                True,
+                False,
+                "importance값은 음수가 될 수 없습니다.",
+            )
+        except:
+            self.assertEqual(
+                True,
+                True,
+                "정상적 상황.",
+            )
+
+    # 여기서 부터
     def test_SellectedQuestionsDetail_delete_1(self):
         response = self.client.delete(
             self.URL,
@@ -406,6 +535,18 @@ class TestSellectedQuestionsLoginDetail(APITestCase):
             response.status_code,
             204,
             "status code isn't 204.",
+        )
+
+    def test_SellectedQuestionsDetail_delete_2(self):
+        question_before = Questions.get_object(self.question.pk)
+        self.client.delete(
+            self.URL,
+        )
+        question_after = Questions.get_object(self.question.pk)
+        self.assertEqual(
+            question_before.count - 1,
+            question_after.count,
+            "SQ삭제시 question의 count가 -1이 안되었습니다.",
         )
 
 

@@ -43,7 +43,7 @@ def serializer_put_sellectedQuestion_importance(
     importance, sellectedQuestion: SellectedQuestions
 ):
     sellectedQuestion_importance_dict = {
-        "importance": sellectedQuestion.importance + int(importance),
+        "importance": sellectedQuestion.importance_calc(int(importance)),
     }
     serializer = ImportanceSellectedQuestionSerializer(
         sellectedQuestion,
