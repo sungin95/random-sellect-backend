@@ -2,7 +2,7 @@ from .questions import serializer_create_questions
 from .sellectedQuestions import serializer_create_sellectedQuestion
 from django.db import transaction
 from questions.models import Questions
-from functions.errors import errors_check
+from functions.functions import errors_check
 
 
 @transaction.atomic(using="default")

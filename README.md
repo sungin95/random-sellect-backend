@@ -45,11 +45,11 @@ ex) Q: 웹 사이트 만드신 이유가 뭔가요?
 
 ## 유즈케이스
 
-
+[use-case](https://github.com/sungin95/random-sellect-backend/blob/master/documents/use-case.svg)
 
 ## ERD
 
-
+[ERD](https://github.com/sungin95/random-sellect-backend/blob/master/documents/randomQustions.svg)
 
 
 

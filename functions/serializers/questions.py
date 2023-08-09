@@ -1,11 +1,7 @@
 from questions.serializers import (
     QuestionsSerializer,
     QuestionsCreateSerializer,
-    SellectedQuestionSerializer,
-    ShowSellectedQuestionSerializer,
-    ImportanceSellectedQuestionSerializer,
 )
-from rest_framework.exceptions import ParseError
 
 
 def serializer_get_questions(questions):

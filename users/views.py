@@ -8,15 +8,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ParseError, NotFound
-from .models import User
-from .serializers import UserSerializer
+from rest_framework.exceptions import ParseError
 from functions.serializers.users import (
     serializer_get_user,
-    serializer_put_user,
     serializer_create_user,
+    # serializer_put_user,
 )
-from functions.errors import errors_check
+from functions.functions import errors_check
 
 
 class Me(APIView):

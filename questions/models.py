@@ -98,7 +98,7 @@ class SellectedQuestions(Question):
         try:
             with transaction.atomic():
                 question = Questions.objects.get(pk=question_pk)
-                question.count += 1
+                question.count_n(1)
                 question.save()
                 sellected_question = SellectedQuestions.objects.create(
                     description=question.description,

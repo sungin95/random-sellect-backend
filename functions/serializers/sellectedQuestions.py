@@ -1,13 +1,10 @@
 from questions.serializers import (
-    QuestionsSerializer,
     QuestionsCreateSerializer,
     SellectedQuestionSerializer,
     ShowSellectedQuestionSerializer,
     ImportanceSellectedQuestionSerializer,
 )
-from rest_framework.exceptions import ParseError
 from questions.models import Questions, SellectedQuestions
-from django.db import transaction
 
 
 # get
