@@ -32,7 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     ".gpt-is-interviewer.me",
-    ".ap-northeast-2.compute.amazonaws.com",
+    "ec2-43-201-82-16.ap-northeast-2.compute.amazonaws.com",
 ]
 
 
