@@ -154,7 +154,7 @@ AUTH_USER_MODEL = "users.User"
 # CORS_ALLOWED_ORIGINS = [env("FRONT_PAGE")]
 # CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
 
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # if env("DEPLOYING") == "True":
 #     SESSION_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
