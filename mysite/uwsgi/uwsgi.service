@@ -3,7 +3,7 @@ Description=uWSGI service
 After=syslog.target
 
 [Service]
-ExecStart=/home/ubuntu/venv/bin/uwsgi -i /srv/random-sellect-backend/mysite/uwsgi/mysite.ini
+ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /srv/random-sellect-backend/mysite/uwsgi/mysite.ini
 
 Restart=always
 KillSignal=SIGQUIT
