@@ -147,17 +147,17 @@ PAGE_SIZE = 10
 AUTH_USER_MODEL = "users.User"
 
 
-# CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_WHITELIST = [
-#     env("FRONT_PAGE"),
-# ]
-# CORS_ALLOWED_ORIGINS = [env("FRONT_PAGE")]
-# CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    env("FRONT_PAGE"),
+]
+CORS_ALLOWED_ORIGINS = [env("FRONT_PAGE")]
+CSRF_TRUSTED_ORIGINS = [env("FRONT_PAGE")]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-# if env("DEPLOYING") == "True":
-#     SESSION_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
-#     CSRF_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
-# elif env("DEPLOYING") == "False":
-#     pass
+if env("DEPLOYING") == "True":
+    SESSION_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
+    CSRF_COOKIE_DOMAIN = env("FRONT_PAGE_COOKIE")
+elif env("DEPLOYING") == "False":
+    pass
