@@ -1,6 +1,6 @@
 프론트 링크: https://github.com/sungin95/random-sellect-frontend
 <br>
-배포된 페이지 링크 : 
+배포된 페이지 링크 : (비용 문제로 배포 중지)
 
 ## 목차
 
@@ -141,7 +141,10 @@ ex) Q: 웹 사이트 만드신 이유가 뭔가요?
 **○ 로그인을 해도 프론트에서 로그인이 안됨**
 
 - 쿠키 문제
-  - 도메인의 서버 도메인이 달라서 생긴 문제
+  - 도메인의 서브 도메인이 달라서 생긴 문제
+    - 프론트 서버: www.gpt-is-interviewer.me
+    - 백엔드 서버: backend.gpt-is-interviewer.me
+    - 이 둘의 서브 도메인이 달라서 생긴 문제입니다. 
   - settings에서 쿠키 설정을 줘서 서브 도메인에 상관없도록 만듬
   - ".gpt-is-interviewer.me”
 
