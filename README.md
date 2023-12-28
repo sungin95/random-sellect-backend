@@ -1,5 +1,6 @@
 프론트 링크: https://github.com/sungin95/random-sellect-frontend
-배포된 페이지 링크 : https://www.gpt-is-interviewer.me/1
+<br>
+배포된 페이지 링크 : 
 
 ## 목차
 
